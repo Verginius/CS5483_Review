@@ -1,6 +1,7 @@
 import os
 import json
 
+# (The strings m01 - m15 remain the same as the previous correct execution)
 m01 = """
 <h1>MODULE 01: 概述与数据预处理</h1>
 <p style="font-size: 14px; color: var(--muted); border-left: 4px solid var(--border); padding-left: 12px; margin-top: -16px; margin-bottom: 32px;">📄 <strong>参考讲义：</strong><code>Overview.pptx</code></p>
@@ -458,8 +459,14 @@ m10 = """
     <li><strong>Border points (边界点)</strong>：边缘角色。它拉开雷达发现圈内人数惨淡，根本不够 MinPts 指标，无法自立门户。但是，极其幸运的是，它 <strong>刚好处于某一个核心点的雷达辐射圈内</strong>。因此，它被核心点强行收编，成为该聚类簇的边界护城河。</li>
     <li><strong>Noise (噪声点)</strong>：流放者。自己雷达圈内人数极少，同时也悲惨地没有被任何核心点的势力范围所覆盖。DBSCAN 将其无情打上 Noise 标签丢弃。这就是它 <strong>天生拥有强大抗噪鲁棒性</strong> 的奥秘。</li>
 </ul>
-<h3>组建帝国的规则：</h3>
-<p>通过 <strong>密度直达 (Density-reachable)</strong> 关系，所有互相进入彼此辐射圈的核心点，如同烽火台一样互相传递信号，连缀成一个庞大的连通网络，被称为 <strong>密度相连 (Density-connectedness)</strong>。这一整片错综复杂的核心点网络，再加上它们各自收编的那些边界点，构成了一个形态各异、无法预测的巨大单独簇群。</p>
+<h3>组建帝国的规则 (DBSCAN执行流)：</h3>
+<ol>
+    <li>标记所有点 <strong>Unvisited</strong>。随机挑一个标记 Visited。</li>
+    <li>打开雷达，扫出距离 $\\le Eps$ 的邻居。</li>
+    <li>如果邻居 $\\ge MinPts$，该点封神为 <strong>Core Point (核心点)</strong>。建新簇 $C$。</li>
+    <li>通过 <strong>Density-reachable (密度可达)</strong> 顺藤摸瓜，遍历它所有邻居，如果邻居也是核心点，就把邻居的邻居全拉进 $C$。拔出萝卜带出泥。</li>
+    <li>如果邻居 $< MinPts$，打上 <strong>Noise (噪声)</strong> 标签无情抛弃。</li>
+</ol>
 <h2>3. 变密度的痛点与 OPTICS 的降维打击</h2>
 <p><strong>DBSCAN 的死穴</strong>：它对 Eps 和 MinPts 两个参数的依赖达到了病态的程度。<br>
 想象一个场景：城市中心的高端住宅区密集无比，而郊区的平房区相对稀疏。如果设定极小的 Eps，城市中心完美分群，但郊区的居民将全被判定为孤立噪声点；如果设定极大的 Eps，郊区居民成功建簇，但整个城市中心的多个截然不同的小区会被极度宽泛的阈值直接溶解成一个大黑洞。<br>
@@ -484,7 +491,7 @@ m10 = """
 m11 = """
 <h1>MODULE 11: Cluster Analysis Evaluation (聚类评估与指控)</h1>
 <p style="font-size: 14px; color: var(--muted); border-left: 4px solid var(--border); padding-left: 12px; margin-top: -16px; margin-bottom: 32px;">📄 <strong>参考讲义：</strong><code>ClusterAnalysis_EV.pptx</code></p>
-<div class="highlight"><strong>核心考点：</strong>聚类分析有效性前提、Elbow肘部法则的寻找逻辑、Silhouette轮廓系数中内聚和分离的抗争、以及外外在指标 B-Cubed 评估与 WEKA 的错误率折算。</div>
+<div class="highlight"><strong>核心考点：</strong>聚类分析有效性前提、Elbow肘部法则的寻找逻辑、Silhouette轮廓系数中内聚和分离的抗争、以及外在指标 B-Cubed 评估与 WEKA 的错误率折算。</div>
 <h2>1. 聚类评估的三重天审视</h2>
 <p>与监督学习可以通过交叉验证算出确凿无疑的准确率不同，评估在黑暗中摸索的聚类是一门充满主观性与争议的玄学。我们必须从三个层次进行拷问：</p>
 <ul>
@@ -742,36 +749,44 @@ m15 = """
 </ol>
 """
 
-modules_data_js = f"""const modulesData = {{
-  m01: {{json.dumps(m01)}},
-  m02: {{json.dumps(m02)}},
-  m03: {{json.dumps(m03)}},
-  m04: {{json.dumps(m04)}},
-  m05: {{json.dumps(m05)}},
-  m06: {{json.dumps(m06)}},
-  m07: {{json.dumps(m07)}},
-  m08: {{json.dumps(m08)}},
-  m09: {{json.dumps(m09)}},
-  m10: {{json.dumps(m10)}},
-  m11: {{json.dumps(m11)}},
-  m12: {{json.dumps(m12)}},
-  m13: {{json.dumps(m13)}},
-  m14: {{json.dumps(m14)}},
-  m15: {{json.dumps(m15)}}
+# Extract the data directly to a data.js file
+data_js_content = f"""const modulesData = {{
+  m01: {json.dumps(m01)},
+  m02: {json.dumps(m02)},
+  m03: {json.dumps(m03)},
+  m04: {json.dumps(m04)},
+  m05: {json.dumps(m05)},
+  m06: {json.dumps(m06)},
+  m07: {json.dumps(m07)},
+  m08: {json.dumps(m08)},
+  m09: {json.dumps(m09)},
+  m10: {json.dumps(m10)},
+  m11: {json.dumps(m11)},
+  m12: {json.dumps(m12)},
+  m13: {json.dumps(m13)},
+  m14: {json.dumps(m14)},
+  m15: {json.dumps(m15)}
 }};"""
 
+with open('data.js', 'w', encoding='utf-8') as f:
+    f.write(data_js_content)
+print("data.js successfully written.")
+
+# Now clean up index.html to source data.js instead of embedding everything!
 with open('index.html', 'r', encoding='utf-8') as f:
-    content = f.read()
+    html_content = f.read()
 
 start_marker = "const modulesData = {"
 end_marker = "function openModule(modId) {"
-start_idx = content.find(start_marker)
-end_idx = content.find(end_marker)
+start_idx = html_content.find(start_marker)
+end_idx = html_content.find(end_marker)
 
 if start_idx != -1 and end_idx != -1:
-    new_content = content[:start_idx] + modules_data_js + "\n\n" + content[end_idx:]
+    # Inject <script src="data.js"></script> just before the main script logic
+    # The new html removes the massive block and adds the src linking
+    new_html = html_content[:start_idx] + "</script>\n<script src=\"data.js\"></script>\n<script>\n" + html_content[end_idx:]
     with open('index.html', 'w', encoding='utf-8') as f:
-        f.write(new_content)
-    print("Reference filenames appended to all modules successfully.")
+        f.write(new_html)
+    print("index.html successfully updated to use data.js architecture.")
 else:
-    print("Could not find insertion points.")
+    print("Could not find the embedded data to replace in index.html.")
