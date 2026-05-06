@@ -396,8 +396,8 @@ m08 = """
 <h2>4. 项集的存储与压缩技术 (Maximal & Closed)</h2>
 <p>为了解决高维频繁模式导致子集呈指数级增长的存储问题，通常采用以下压缩表示：</p>
 <ul>
-    <li><strong>极大频繁项集 (Maximal frequent itemsets)</strong>：自身是频繁的，且没有任何超集是频繁的。它隐含了其所有子集均频繁的信息。</li>
-    <li><strong>闭合项集 (Closed Patterns)</strong>：自身是频繁的，且不存在与它拥有 <strong>相同支持度计数 (count)</strong> 的超集。它在压缩数据的同时，保留了所有子集的确切支持度信息。</li>
+    <li><strong>极大频繁项集 (Maximal frequent itemsets)</strong>：自身是频繁的，且没有任何真超集 (proper superset) 是频繁的。它隐含了其所有子集均频繁的信息。</li>
+    <li><strong>闭合项集 (Closed Patterns)</strong>：自身是频繁的，且不存在与它拥有 <strong>相同支持度计数 (count)</strong> 的真超集。它在压缩数据的同时，保留了所有子集的确切支持度信息。</li>
 </ul>
 <h2>5. 规则评估：Confidence 的局限与 Lift</h2>
 <p>高 Confidence 可能产生统计学上的误导。<br>
