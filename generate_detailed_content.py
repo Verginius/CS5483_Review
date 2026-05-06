@@ -656,10 +656,17 @@ m13 = """
 
 <h2>3. BUC 算法机制与剪枝奥义 (Bottom-Up Construction)</h2>
 <p>尽管名为 Bottom-Up，BUC 算法在构建 Data Cube 时实际采用 <strong>自顶向下 (从覆盖全集的 0-D Apex 节点开始，逐步向下深钻进行维度细化切割)</strong> 的执行流向。</p>
-<p><strong>BUC 单调性剪枝 (Pruning) 的原理</strong>：<br>
-在进行向下细分推导时，任何父集节点的总数量指标 (如 <code>Count</code>) 必然大于等于其派生的所有子集节点的数量。这称为 <strong>聚合频次的单调递减性</strong>。<br>
-基于此特性，在自顶向下的递归深钻过程中，一旦某过渡节点统计出的 <code>Count</code> 值已经低于设定的 <strong>冰山生存阈值 (Iceberg Threshold)</strong>，则由它继续细分产生的所有子代节点，其数据量必定不可能回升超过该阈值。<br>
-算法在此处直接触发 <strong>剪枝 (Prune)</strong>，立刻停止对该分支后续所有下层维度的组合探索与计算。这种及时的截断处理正是 BUC 在高维稀疏数据上性能卓越的根基。</p>
+<p><strong>BUC 算法执行流程:</strong></p>
+<p><strong>输入：</strong>基础事实表数据；维度属性列表；冰山阈值 <code>Min_Support</code>。<br>
+<strong>输出：</strong>满足冰山阈值限制的数据立方体 (Iceberg Cube)。</p>
+<ol>
+    <li><strong>[自顶向下启动]</strong>：从 0-D 的 Apex 节点（代表所有数据的全量汇总）开始，准备沿各个维度进行切分。</li>
+    <li><strong>[当前节点聚合]</strong>：计算当前节点在给定维度条件下的聚集指标（如 <code>Count</code> 或 <code>Sum</code>）。</li>
+    <li><strong>[冰山阈值检测]</strong>：判断当前节点的聚集指标是否低于设定的冰山阈值 (Iceberg Threshold)。</li>
+    <li><strong>[触发单调性剪枝]</strong>：如果低于阈值，根据聚合频次的单调递减性，直接触发 <strong>剪枝 (Prune)</strong>，立刻停止对该分支后续所有下层维度的细化切割与探索。</li>
+    <li><strong>[递归数据细分]</strong>：如果满足阈值要求，则保存该节点的聚合结果，并沿着剩余可用维度对数据进行划分 (Partition)，对生成的每个子部分递归执行上述聚合与检测流程。</li>
+    <li><strong>[完成计算]</strong>：当所有维度的递归分支都处理或被剪枝完毕后，算法停止并输出高度压缩的 Iceberg Cube 结果。</li>
+</ol>
 
 <h2>4. CCIC (Closed Cube) 的存储优化压缩</h2>
 <p>对于紧密绑定的属性关联组合，向下细分的新维度可能并不会实质性削减数据量（例如特定设备的特定玩家群体，其汇总 <code>Count</code> 与上层指标完全相同）。<br>
