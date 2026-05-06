@@ -5,12 +5,16 @@ m01 = """
 <h1>MODULE 01: 概述与数据预处理</h1>
 <div class="highlight"><strong>核心考点：</strong>KDD流程全貌、数据特征的具体类型、缺失值与冗余特征处理、距离与相似度度量深度分析。</div>
 <h2>1. 什么是数据挖掘与知识发现 (KDD)?</h2>
-<p>数据挖掘 (Data Mining) 是知识发现 (Knowledge Discovery in Databases, KDD) 过程中最为核心的一环。严格按照课件定义，完整的 KDD 包含以下 7 个标准步骤：</p>
+<p>数据挖掘 (Data Mining) 是知识发现 (Knowledge Discovery in Databases, KDD) 过程中最为核心的一环。严格按照课件定义，完整的 KDD 包含以下 <strong>4 个核心步骤</strong>：</p>
 <ol>
-    <li><strong>Data cleaning (数据清洗)</strong>：移除噪声 (noise) 和不一致的数据。</li>
-    <li><strong>Data integration (数据集成)</strong>：将多个数据源 (multiple data sources) 组合在一起。</li>
-    <li><strong>Data selection (数据选择)</strong>：从数据库中检索与分析任务相关的数据。</li>
-    <li><strong>Data transformation (数据转换)</strong>：通过执行汇总或聚集操作，将数据转换或统一成适合数据挖掘的形式。</li>
+    <li><strong>Data Pre-processing (数据预处理)</strong>：这是极其耗时且重要的一步，它的内部又细分为四个子操作：
+        <ul>
+            <li>Data cleaning (数据清洗)</li>
+            <li>Data integration (数据集成)</li>
+            <li>Data selection (数据选择)</li>
+            <li>Data transformation (数据转换)</li>
+        </ul>
+    </li>
     <li><strong>Data mining (数据挖掘)</strong>：KDD 中最核心的步骤，应用智能方法提取数据模式 (data patterns)。</li>
     <li><strong>Pattern evaluation (模式评估)</strong>：基于某些有趣性度量 (interestingness measures) 识别出真正代表知识的有趣模式。</li>
     <li><strong>Knowledge presentation (知识表示)</strong>：使用可视化和知识表示技术向用户展示挖掘出的知识。</li>
@@ -35,8 +39,8 @@ m01 = """
 </ul>
 
 <h3>🎯 Mock Exam 经典例题</h3>
-<p><strong>【Q1. 简答题】</strong>请严格按照讲义定义，列举出完整的 KDD (Knowledge Discovery from Databases) 过程所包含的 7 个步骤。</p>
-<p><strong>【解答】</strong>: 完整的 KDD 步骤包含：<br>1. Data cleaning (数据清洗)<br>2. Data integration (数据集成)<br>3. Data selection (数据选择)<br>4. Data transformation (数据转换)<br>5. Data mining (数据挖掘)<br>6. Pattern evaluation (模式评估)<br>7. Knowledge presentation (知识表示)</p>
+<p><strong>【Q1. 简答题】</strong>请严格按照讲义定义，列举出完整的 KDD (Knowledge Discovery from Databases) 过程所包含的 4 个核心步骤，并指明哪一个步骤包含了“数据清洗”。</p>
+<p><strong>【解答】</strong>: 完整的 KDD 步骤包含 4 大阶段：<br>1. Data Pre-processing (数据预处理)<br>2. Data mining (数据挖掘)<br>3. Pattern evaluation (模式评估)<br>4. Knowledge presentation (知识表示)<br>其中，“数据清洗 (Data cleaning)” 被归类在第一个核心大阶段 <strong>Data Pre-processing</strong> 的子流程当中。</p>
 <p><strong>【Q2. 计算题】</strong>给出两个向量 $X = (1, 3)$ 和 $Y = (4, 7)$，请分别计算它们之间的曼哈顿距离、欧氏距离和切比雪夫距离。</p>
 <p><strong>【解答】</strong>:<br>
 - 曼哈顿距离 ($L_1$): $|1-4| + |3-7| = 3 + 4 = 7$<br>
