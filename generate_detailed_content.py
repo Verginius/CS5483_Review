@@ -7,26 +7,26 @@ m01 = """
 <h2>1. 什么是数据挖掘与知识发现 (KDD)?</h2>
 <p>数据挖掘 (Data Mining) 是知识发现 (Knowledge Discovery from Databases, KDD) 过程中最为核心的一环。严格按照课件原图，完整的 KDD 包含以下 <strong>4 个核心步骤</strong>：</p>
 <ol>
-    <li><strong>Preparation</strong>
+    <li><strong>Preparation (准备阶段)</strong>
         <ul>
-            <li>set the goal (what to learn)</li>
+            <li>设定挖掘目标（决定需要学习和发现什么）。</li>
         </ul>
     </li>
-    <li><strong>Pre-processing</strong>
+    <li><strong>Pre-processing (数据预处理阶段)</strong>
         <ul>
-            <li>Data cleaning/integration: handle noise/errors/missing values</li>
-            <li>Data selection/reduction/transformation/discretization: create target data set with relevant samples/variables</li>
+            <li>数据清洗/数据集成 (Data cleaning/integration)：处理噪声、错误以及填补缺失值。</li>
+            <li>数据选择/归约/转换/离散化 (Data selection/reduction/transformation/discretization)：筛选相关的样本与变量，构建出用于挖掘的目标数据集。</li>
         </ul>
     </li>
-    <li><strong>Data mining</strong>
+    <li><strong>Data mining (数据挖掘阶段)</strong>
         <ul>
-            <li>Apply learning algorithm(s) to compute desired patterns from processed data</li>
+            <li>应用具体的机器学习算法，从预处理好的数据中计算并提取出期望的模式 (patterns)。</li>
         </ul>
     </li>
-    <li><strong>Interpretation</strong>
+    <li><strong>Interpretation (解释与部署阶段)</strong>
         <ul>
-            <li>Iterate if performance is unsatisfactory</li>
-            <li>Deploy if ready: report, incorporate, apply</li>
+            <li>如果评估发现模型性能不令人满意，则返回前序步骤进行不断迭代 (Iterate)。</li>
+            <li>如果结果准备就绪，则执行部署 (Deploy)：包括生成报告、系统整合以及落地应用。</li>
         </ul>
     </li>
 </ol>
@@ -51,7 +51,7 @@ m01 = """
 
 <h3>🎯 Mock Exam 经典例题</h3>
 <p><strong>【Q1. 简答题】</strong>请严格按照讲义原图定义，列举出完整的 KDD (Knowledge Discovery from Databases) 过程所包含的 4 个核心步骤，并指明哪一个大步骤包含了 Deploy (部署)？</p>
-<p><strong>【解答】</strong>: 完整的 KDD 步骤包含 4 大阶段：<br>1. Preparation<br>2. Pre-processing<br>3. Data mining<br>4. Interpretation<br>其中，部署 (Deploy if ready: report, incorporate, apply) 被归类在第四个核心大阶段 <strong>Interpretation</strong> 当中。</p>
+<p><strong>【解答】</strong>: 完整的 KDD 步骤包含 4 大阶段：<br>1. Preparation (准备)<br>2. Pre-processing (预处理)<br>3. Data mining (数据挖掘)<br>4. Interpretation (解释与部署)<br>其中，部署 (Deploy if ready: report, incorporate, apply) 被归类在第四个核心大阶段 <strong>Interpretation (解释)</strong> 当中。</p>
 <p><strong>【Q2. 计算题】</strong>给出两个向量 $X = (1, 3)$ 和 $Y = (4, 7)$，请分别计算它们之间的曼哈顿距离、欧氏距离和切比雪夫距离。</p>
 <p><strong>【解答】</strong>:<br>
 - 曼哈顿距离 ($L_1$): $|1-4| + |3-7| = 3 + 4 = 7$<br>
