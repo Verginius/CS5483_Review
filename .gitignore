@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+
+# Logs and text extracts
+*.log
+output.log
+ocr_output.log
+pdf_output.log
+*.txt
+mock_exam_text.txt
+exam_text_extracted.txt
+lectures_text_extracted.txt
+
+# Projects and Zips
+MTR_Stress_Flow_Simulation.zip
+CS5483_Team-Project_MTR-Stress-Flow-Simulation/
+MTR_Stress_Flow_Simulation/
+
+# Sensitive data
+ssh key/
+
+# OS generated files
+.DS_Store
+Thumbs.db
