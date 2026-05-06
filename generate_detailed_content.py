@@ -361,6 +361,14 @@ m06 = """
     <li><strong>[元分类器融合]</strong>：将新特征向量输入更高阶的 <strong>元分类器 (Meta Classifier)</strong>，由其学习如何结合这些底层预测，得出最终结论。</li>
 </ol>
 
+<h2>3. 集成投票机制 (Voting Strategies)</h2>
+<p>在集成学习中，如何将多个基分类器的预测结果进行融合以做出最终决策是极其关键的一环。常见的投票与融合策略包括：</p>
+<ul>
+    <li><strong>多数投票 (Majority / Hard Voting)</strong>：每个基分类器直接输出其预测类别（硬标签），所有分类器“一人一票”，得票最多的类别即为集成的最终输出。常用于 Bagging 和 Random Forest 的分类任务。</li>
+    <li><strong>加权投票 (Weighted Voting)</strong>：根据基分类器在训练或验证集上的可靠性（如错误率）为其分配不同的决策权重。预测准确率越高的基模型拥有越大的话语权，如 AdaBoost 的加权决策机制。</li>
+    <li><strong>软投票 (Soft Voting / Probability Averaging)</strong>：基分类器不直接输出硬标签，而是输出属于各个类别的 <strong>概率得分</strong>（置信度）。集成系统对所有模型的概率进行加权或直接求均值，取平均概率最大的类别。由于保留了置信度细粒度信息，软投票通常比多数硬投票的表现更为优异。</li>
+</ul>
+
 <h3>🎯 经典例题</h3>
 <p><strong>【Q1. 加权公式推演题】</strong>在 AdaBoost 中，如果第 $m$ 个基分类器的加权错误率 $\\epsilon_m$ 等于 0.2，请写出分配给这棵树的权重 $\\alpha_m$ 的计算过程。</p>
 <p><strong>【解答】</strong>:<br>
