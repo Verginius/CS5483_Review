@@ -148,16 +148,30 @@ m03 = """
 <p>决策树采用自上而下的 <strong>Divide and Conquer (分而治之)</strong> 策略，在每一步分裂中寻找使子集纯度提升最大的属性。<br>
 <strong>局限性 (Myopic Problem)</strong>：由于采用贪心策略，决策树每次分裂仅关注当前步骤的局部最优解，不考虑后续分裂的组合效应，可能无法达到全局最优状态。</p>
 <h2>2. 杂质度量与分裂准则 (Impurity Measures)</h2>
-<p>决策树的主要分裂标准包括：</p>
+<p>决策树的主要分裂标准及计算公式包括：</p>
 <ul>
-    <li><strong>Shannon's Entropy (信息熵)</strong>：计算公式 $H(p) = -\\sum p_i \\log_2(p_i)$，反映数据的混乱程度。类别分布越均匀，熵越高。
-        <ul>
-            <li><strong>Information Gain (信息增益, ID3使用)</strong> = 父节点熵 - 子节点加权熵。倾向于选择能最大程度降低混乱度的属性。<br>
-            <strong>偏向性缺陷</strong>：若某属性具有大量唯一值（如“ID”），其分裂将产生大量纯度极高的单一分支，信息增益会达到最大。但此种分裂缺乏泛化能力，容易导致过拟合。</li>
-            <li><strong>Gain Ratio (增益率, C4.5使用)</strong> = $\\frac{Information\\ Gain}{Split\\ Information}$。Split Info 为属性本身分裂产生的熵：$SplitInfo_A(D) = -\\sum_{j=1}^v \\frac{|D_j|}{|D|} \\log_2 \\left(\\frac{|D_j|}{|D|}\\right)$。多值属性的 Split Info 较大，作为分母有效抑制了对多值属性的偏向。</li>
-        </ul>
+    <li><strong>Shannon's Entropy (信息熵 / Info)</strong><br>
+        反映数据的混乱程度，类别分布越均匀，熵越高。<br>
+        计算公式：$H(p) = -\\sum p_i \\log_2(p_i)$ （或表示为 $H(S) = -\\sum_{i=1}^c p_i \\log_2(p_i)$）
     </li>
-    <li><strong>Gini Impurity (基尼不纯度, CART使用)</strong>：公式 $Gini(p) = 1 - \\sum_{i=1}^J p_i^2$。衡量随机抽取两个样本其类别不一致的概率。Gini 在二元分类下计算效率较高，通常倾向于划分大小相对均衡的子集。</li>
+    <li><strong>Information Gain (信息增益 / Gain)</strong><br>
+        用于 ID3 算法，倾向于选择能最大程度降低混乱度的属性。<br>
+        计算公式：$Information\\ Gain = 父节点熵 - 子节点加权熵$<br>
+        即：$IG(S, A) = H(S) - \\sum_{v \\in A} \\frac{|S_v|}{|S|} H(S_v)$<br>
+        <strong>偏向性缺陷</strong>：若某属性具有大量唯一值（如“ID”），其分裂将产生大量纯度极高的单一分支，信息增益会达到最大。但此种分裂缺乏泛化能力，容易导致过拟合。
+    </li>
+    <li><strong>Split Information (分裂信息 / SplitInfo)</strong><br>
+        属性本身分裂产生的熵，用于惩罚多值属性。<br>
+        计算公式：$SplitInfo_A(D) = -\\sum_{j=1}^v \\frac{|D_j|}{|D|} \\log_2 \\left(\\frac{|D_j|}{|D|}\\right)$
+    </li>
+    <li><strong>Gain Ratio (增益率)</strong><br>
+        用于 C4.5 算法，通过引入 SplitInfo 作为分母，有效抑制了对多值属性的偏向问题。<br>
+        计算公式：$Gain\\ Ratio = \\frac{Information\\ Gain}{Split\\ Information}$
+    </li>
+    <li><strong>Gini Impurity (基尼不纯度 / Gini)</strong><br>
+        用于 CART 算法，衡量随机抽取两个样本其类别不一致的概率。Gini 在二元分类下计算效率较高，通常倾向于划分大小相对均衡的子集。<br>
+        计算公式：$Gini(p) = 1 - \\sum_{i=1}^J p_i^2$
+    </li>
 </ul>
 
 <h2>3. WEKA 决策树算法：J48, REPTree 与 RandomTree 流程</h2>
@@ -626,12 +640,23 @@ m12 = """
 <h2>1. OLTP 与 OLAP 系统的差异</h2>
 <p><strong>OLTP (联机事务处理)</strong> 面向日常业务操作，支持高并发的插入、更新和删除事务，优化数据一致性。若在其上执行涉及全库扫描的大规模聚合查询，会消耗大量资源并可能锁定表。<br>
 为满足企业级报表与分析需求，<strong>Data Warehouse (数据仓库)</strong> 应运而生。数据仓库基于 <strong>OLAP (联机分析处理)</strong> 架构，通过预先计算汇总历史数据，存储在多维的 Data Cube (数据立方体) 中，实现对复杂聚合查询的毫秒级响应。</p>
-<h2>2. 维度建模 (Dimension Modeling) 与 Lattice 结构</h2>
-<p>数据仓库常采用星型模型 (Star Schema)，其包含两类基本表：</p>
+<h2>2. 维度建模 (Dimension Modeling) 与 Schema 模式</h2>
+<p>数据仓库的核心是多维数据模型，其包含两类基本表：</p>
 <ul>
-    <li><strong>Dimension (维度)</strong>：分析观察业务的角度与层级，如时间、地点、产品等，提供数据过滤和分组依据。</li>
-    <li><strong>Fact / Measure (事实与度量)</strong>：被量化分析的核心业务指标数值，如销售量、金额等。</li>
+    <li><strong>Dimension (维度表)</strong>：分析观察业务的角度与层级属性，如时间、地点、产品等，提供数据过滤和分组的依据。</li>
+    <li><strong>Fact / Measure (事实表与度量)</strong>：包含被量化分析的核心业务指标数值（如销售量、金额）以及指向各个维度表的键。</li>
 </ul>
+<h3>三大经典多维数据 Schema 模式：</h3>
+<ul>
+    <li><strong>Star Schema (星型模式)</strong>：<br>
+        最常见、最简单的模式。中心是一个巨大的事实表，周围环绕着多个非规范化（即存在一定冗余）的维度表，整体呈现放射状星型结构。查询效率高，但维度表可能占用更多存储空间。</li>
+    <li><strong>Snowflake Schema (雪花模式)</strong>：<br>
+        星型模式的变体。将星型模式中庞大的维度表进一步规范化（拆分），分解成多个相关的子维度表，形成类似雪花的层级结构。优点是减少了数据冗余和存储空间，缺点是增加了查询时的表连接 (Join) 数量，降低了查询性能。</li>
+    <li><strong>Fact Constellation (事实星座模式 / 星系模式)</strong>：<br>
+        包含多个事实表，且这些事实表共享部分公共维度表。适用于复杂的企业级数据仓库架构，能够支持跨越多个业务主题（如销售与库存）的综合性交叉分析。</li>
+</ul>
+
+<h2>3. Lattice Structure (晶格网络) 与 OLAP 操作</h2>
 <p><strong>Lattice Structure (晶格网络)</strong>：<br>
 包含 $N$ 个维度的 Data Cube 会生成 $2^N$ 种不同聚合程度的 <strong>Cuboids (立方体视图)</strong>。它们从包含全维度的最精细基础视图 (Base Cuboid) 逐层向上归总，直到 0-D 没有任何维度限制的 <strong>Apex Cuboid (全量汇总)</strong>，整体构成了具有偏序关系的晶格层级网络。</p>
 <h2>3. 四大核心 OLAP 操作</h2>
