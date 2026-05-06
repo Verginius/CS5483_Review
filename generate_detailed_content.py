@@ -1,7 +1,6 @@
 import os
 import json
 
-# (The strings m01 - m15 remain the same as the previous correct execution)
 m01 = """
 <h1>MODULE 01: 概述与数据预处理</h1>
 <p style="font-size: 14px; color: var(--muted); border-left: 4px solid var(--border); padding-left: 12px; margin-top: -16px; margin-bottom: 32px;">📄 <strong>参考讲义：</strong><code>Overview.pptx</code></p>
@@ -39,7 +38,17 @@ m01 = """
     <li><strong>Ordinal (序数型)</strong>：如满意度（高、中、低）。有明确顺序，但间隔无意义。算法处理时有时会将其转化为数值，有时转化为标称。</li>
     <li><strong>Numeric / Continuous (数值型 / 连续型)</strong>：包含区间型 (Interval) 和比率型 (Ratio，有绝对零点)。可计算均值和方差，也是 KNN 等计算欧氏距离的必备类型。在 WEKA 中用 <code>numeric</code> 表示。</li>
 </ul>
-<h2>3. 距离与相似度度量详解</h2>
+
+<h2>3. WEKA 数据预处理核心算法流程</h2>
+<p><strong>ReplaceMissingValues 过滤器执行流程:</strong></p>
+<ol>
+    <li>扫描数据集中的每一列特征属性。</li>
+    <li>如果该列是 <strong>Numeric (数值型)</strong>，计算该列所有非缺失样本的 <strong>均值 (Mean)</strong>。将所有缺失的 <code>?</code> 替换为均值。</li>
+    <li>如果该列是 <strong>Nominal (标称型)</strong>，统计该列各种分类的出现频次，找出 <strong>众数 (Mode)</strong>。将所有缺失的 <code>?</code> 替换为众数。</li>
+    <li>如果数据集包含类别标签 (Class Label)，该过滤器可以选择是否针对每个类别的内部独立计算均值/众数，从而让填补更加精确无偏。</li>
+</ol>
+
+<h2>4. 距离与相似度度量详解</h2>
 <p>数据点之间的接近程度是基于实例学习（如 KNN、K-Means 聚类）的核心：</p>
 <ul>
     <li><strong>Minkowski Distance (闵可夫斯基距离)</strong>：广义距离公式 $L_p$ 范数。<br>
@@ -84,8 +93,25 @@ m02 = """
 <strong>F1-score</strong> = $2 \\times \\frac{Precision \\times Recall}{Precision + Recall}$。<br>
 调和平均数的特点是“木桶效应”，只有当 Precision 和 Recall <strong>双双都很高时</strong>，F1 才会高。</p>
 <p><strong>F-beta score</strong> 允许赋予倾向：$F_\\beta = (1 + \\beta^2) \\times \\frac{Precision \\times Recall}{\\beta^2 \\times Precision + Recall}$。当 $\\beta > 1$ 时，更看重 Recall；当 $\\beta < 1$ 时，更看重 Precision。</p>
-<h2>4. ROC 曲线与 PRC 曲线深度对比</h2>
-<p>通过 <strong>Threshold-moving (移动判定阈值)</strong>，每个算法可以产出一系列 TP 和 FP 的组合。在 WEKA 中，可以通过 ThresholdCurve 观察这些动态特性。</p>
+
+<h2>4. WEKA 中的基础判别与阈值算法流</h2>
+<p><strong>ZeroR 算法执行流程 (分类最差基准):</strong></p>
+<ol>
+    <li>扫描全库，无视任何所有的描述性特征变量。</li>
+    <li>仅仅统计目标类标 (Class Label) 的分布。比如正类出现10次，负类出现90次。</li>
+    <li><strong>建立模型</strong>：强制输出类标分布中数量最多的那个类（即 负类）。</li>
+    <li><strong>测试阶段</strong>：无论你输入任何新样本的任何特征，永远闭着眼睛输出 负类。这用于证明如果一个高级算法的预测成功率还不如纯猜大多数，那么这个高级算法是负收益。</li>
+</ol>
+<p><strong>Threshold-moving 曲线画法流程 (ROC/PRC 绘制原理):</strong></p>
+<ol>
+    <li>测试所有样本，让模型为每个样本输出其被判定为正类的 <strong>概率得分 (Probabilities)</strong>。</li>
+    <li>将所有样本按照概率得分从高到低严格排序。</li>
+    <li>一开始，将判定阈值设为无穷大。此时所有样本全被猜为负例（TP=0, FP=0）。</li>
+    <li>逐渐降低阈值，每次只通过一个新样本将其判定为正例。如果它是真正的正例，TPR (Recall) 爬升一格；如果它是假的正例，FPR 向右爬升一格。</li>
+    <li>最终阈值降到0，所有样本全被判定为正，连成整条从 (0,0) 到 (1,1) 的操作特征曲线。</li>
+</ol>
+
+<h2>5. ROC 曲线与 PRC 曲线深度对比</h2>
 <ul>
     <li><strong>ROC Curve (接收者操作特征曲线)</strong>：纵轴为 TPR (Recall)，横轴为 FPR ($1 - Specificity = \\frac{FP}{FP + TN}$)。完美的模型曲线会直达左上角 $(0, 1)$。<strong>AUC (Area Under Curve)</strong> 等于随机抽取一个正例得分高于负例的概率，AUC 越大越好。</li>
     <li><strong>PRC Curve (Precision-Recall 曲线)</strong>：纵轴为 Precision，横轴为 Recall。</li>
@@ -130,42 +156,35 @@ m03 = """
     </li>
     <li><strong>Gini Impurity (基尼不纯度, CART使用)</strong>：公式 $Gini(p) = 1 - \\sum_{i=1}^J p_i^2$。它衡量的是随机抽取两个样本，其标签不一致的概率。Gini 在二元分类下计算比对数快。<strong>倾向特性：Gini 倾向于在数据集中切出大小基本均等的两个分支，而 Entropy 可能会切出一个极大和一个极小的分支。</strong></li>
 </ul>
-<h2>3. 剪枝策略 (Pruning Strategies) 防过拟合</h2>
-<ul>
-    <li><strong>Pre-pruning (预剪枝 / Early Stopping)</strong>：在树生长时限制它。比如设定最大深度、设定分裂最小信息增益阈值、或 WEKA J48 中的 <code>minNumObj</code> (每个叶子节点必须包含的最少实例数)。预剪枝极快，但容易因过早停止而造成欠拟合。</li>
-    <li><strong>Post-pruning (后剪枝)</strong>：树长到最大规模后，自底向上评估。如果将子树折叠为单一叶节点所带来的误差惩罚（在验证集上）小于模型复杂度惩罚，则进行裁剪。经典方法如 CART 的代价复杂度剪枝。后剪枝效果更好，但计算极其昂贵。</li>
-</ul>
-<h2>4. WEKA 中常用的树模型对比 (J48 vs REPTree vs RandomTree)</h2>
-<p><strong>J48 (C4.5) 核心建树执行步骤:</strong></p>
+
+<h2>3. WEKA 决策树大满贯：J48 vs REPTree vs RandomTree 执行全流程</h2>
+<p><strong>J48 算法 (对应 C4.5) 核心建树流程 (Divide-and-Conquer):</strong></p>
 <ol>
-    <li>如果当前节点内所有样本 <strong>同属于一个类别</strong>，直接设为叶子节点。</li>
-    <li>如果已经 <strong>没有属性可分</strong> 或者样本数少于 <code>minNumObj</code> 参数，按多数表决设为叶节点。</li>
-    <li>遍历所有属性，计算 <strong>Gain Ratio</strong> （避免了单纯 Information Gain 的多值偏向）。</li>
-    <li>挑选带来 <strong>最大纯度提升 (Best Split)</strong> 的属性作为节点。</li>
-    <li>根据取值拆分为互不相交的 <strong>子集 (Subsets)</strong>，<strong>递归 (Recursively)</strong> 调用构建子树。</li>
-    <li>整树建完后，激活 <strong>后剪枝 (Post-pruning)</strong>，利用 <code>confidenceFactor</code> 计算折叠误差进行修剪。</li>
+    <li>如果当前节点内所有样本 <strong>同属于一个类别</strong>，直接设为叶子节点，附上该类别标签。</li>
+    <li>如果已经 <strong>没有属性可供切分</strong> 或者当前节点的样本数已经少于 <code>minNumObj</code> 的硬性门槛下限，按多数表决法将其封闭为叶节点。</li>
+    <li>如果还有特征，遍历计算所有候选属性的 <strong>Gain Ratio (增益率)</strong> 纯度分。</li>
+    <li>挑选带来 <strong>最大纯度提升 (Best Split)</strong> 的属性作为分裂节点。</li>
+    <li>将数据集彻底打散划分入互不相交的 <strong>子集 (Subsets)</strong>，对每个子集 <strong>递归 (Recursively)</strong> 调用步骤1到4。</li>
+    <li>整棵大树构建完毕后，立刻启动 <strong>后剪枝 (Post-pruning)</strong> 阶段。利用参数 <code>confidenceFactor</code> 计算折叠整棵子树带来的误差成本是否比维持现状更小，从而进行大刀阔斧的修剪。</li>
 </ol>
-<table border="1" style="width:100%; border-collapse: collapse; margin-bottom: 20px;">
-    <tr><th>WEKA 算法</th><th>原算法对应</th><th>核心特性与参数</th><th>适用场景与优缺点</th></tr>
-    <tr>
-        <td><strong>J48</strong></td>
-        <td>C4.5</td>
-        <td>基于 Gain Ratio。内置了后剪枝机制。关键参数 <code>confidenceFactor</code> ($C$，决定剪枝严格程度，默认0.25，越小剪枝越狠) 和 <code>minNumObj</code> ($M$，叶节点最少样本)。</td>
-        <td>最通用的决策树，可解释性极强，支持名义与数值属性。但在高噪、高相关性特征时容易过拟合。</td>
-    </tr>
-    <tr>
-        <td><strong>REPTree</strong></td>
-        <td>Reduced Error Pruning Tree</td>
-        <td>基于信息增益或方差（可做回归）。使用 Holdout (保留出独立验证集) 专门进行快速的后剪枝 (Reduced Error Pruning)。</td>
-        <td>构建速度极快，防过拟合能力在强噪声数据上比 J48 更有效，但由于切出了独立验证集，对小样本数据集极不友好。</td>
-    </tr>
-    <tr>
-        <td><strong>RandomTree</strong></td>
-        <td>-</td>
-        <td>在分裂时不考察所有属性，而是只考察随机抽取的 $K$ 个属性。不剪枝。</td>
-        <td>单树精度低，极易过拟合，通常绝不单独使用，而是专门作为随机森林 (Random Forest) 的基础构建块。</td>
-    </tr>
-</table>
+
+<p><strong>REPTree (Reduced Error Pruning Tree) 算法核心流程:</strong></p>
+<ol>
+    <li>首先，将整个数据集强行切割为 <strong>训练集</strong> 和 <strong>独立验证集 (Holdout set)</strong>。</li>
+    <li>使用训练集，基于 Information Gain 或方差快速生长出一棵庞大无比的决策树（速度极快）。</li>
+    <li>树建完后，自底向上拿着这棵树去那块 <strong>独立验证集</strong> 上跑跑看。</li>
+    <li>如果发现某个底层的分支节点在独立验证集上犯下的错误，比把它全部揉成一团单一的大叶子还要多（即验证集 Error 上升了），证明此分支纯属过度死记硬背训练集的噪点，算法立刻将该分支 <strong>直接砍断 (Reduced Error Pruning)</strong>。</li>
+</ol>
+
+<p><strong>RandomTree 算法核心流程:</strong></p>
+<ol>
+    <li>在每一步准备计算分裂节点时，算法 <strong>绝对不去看所有的特征</strong>。</li>
+    <li>它会从所有 $M$ 个特征中，盲盒式地 <strong>随机抽取 $K$ 个特征子集</strong>（通常 $K=\\log_2M+1$）。</li>
+    <li>只允许在这随机挑出的 $K$ 个可怜特征里挑一个最好的进行分裂。</li>
+    <li>不仅如此，它一路上生根发芽 <strong>完全不执行任何剪枝操作 (No pruning)</strong>，让树长得极深极庞大。</li>
+    <li><strong>终极使命：</strong>由于这棵树极度不稳定且方差极大，WEKA 绝不会单独依靠它，而是专门用来扔进 RandomForest (随机森林) 里做成千上万棵树去投票平滑误差的。</li>
+</ol>
+
 <h3>🎯 Mock Exam 经典例题</h3>
 <p><strong>【Q1. 计算推演题】</strong>在一个包含 10 条训练样本的节点中，有 6 个是 "Yes"，4 个是 "No"。若我们利用属性 <code>Wind</code> (具有两个分支：Strong 和 Weak) 对其分裂，其中 Strong 分支掉入 2 个 "Yes" 和 3 个 "No"；Weak 分支掉入 4 个 "Yes" 和 1 个 "No"。请写出该次分裂 Information Gain 的计算公式（无需算出最终对数值）。</p>
 <p><strong>【解答】</strong>:<br>
@@ -199,20 +218,18 @@ m04 = """
     <li><strong>$K$ 太小 (如 $K=1$)</strong>：决策边界支离破碎，模型会去拟合周围每一个孤立的噪点 (Noise)。导致极高复杂度的 <strong>过拟合 (Overfitting)</strong>。</li>
     <li><strong>$K$ 极大 (如 $K=N$)</strong>：算法完全退化，对任何人都会预测为样本集中占绝对多数的那个类别 (Majority Class)，这导致 <strong>欠拟合 (Underfitting)</strong>。</li>
 </ul>
-<h2>5. WEKA 中的 KNN 实现：IBk (Instance-Based learning with k)</h2>
-<p>在 WEKA 中，KNN 对应的算法是 <strong>IBk</strong> (位于 <code>lazy</code> 分类下)。</p>
-<p><strong>IBk 算法核心执行步骤:</strong></p>
+
+<h2>5. WEKA 中的 KNN 算法流：IBk (Instance-Based learning)</h2>
+<p>在 WEKA 中，KNN 对应的核心落地算法是 <strong>IBk</strong> (位于 <code>lazy</code> 分类目录下)。由于是懒惰学习，它的执行流截然不同：</p>
+<p><strong>IBk 算法核心测试与预测流程:</strong></p>
 <ol>
-    <li><strong>训练阶段 (Training):</strong> $O(1)$ 时间复杂度。什么都不做，仅仅把数据写入内存。</li>
-    <li><strong>测试阶段 (Testing):</strong> 对新来的实例，计算其与库中每一个点的 <strong>欧氏距离</strong>（必须预先过 <code>Normalize</code> 滤镜）。</li>
-    <li>根据 <code>distanceWeighting</code> 参数（如 Inverse Distance）分配权重。</li>
-    <li>挑选距离最近的 $K$ 个邻居，进行 <strong>多数加权投票</strong>。</li>
+    <li><strong>[Training 阶段]：</strong>算法耗时 $O(1)$，纯粹只是在底层的 <code>LinearNNSearch</code> 或高级的 <code>KDTree</code>/<code>BallTree</code> 空间数据结构里分配一块内存，把所有带有类标的训练数据粗暴地塞进去保存，不建立任何概率模型。</li>
+    <li><strong>[Testing 阶段发力]：</strong>一旦收到一个新的测试实例 $X$，IBk 首先强制调用底层归一化机制，使得 $X$ 身上所有的属性和历史数据的刻度彻底对齐拉平。</li>
+    <li><strong>[Scan & Distance]：</strong>在整个高维空间历史库中扫描，利用欧氏距离计算 $X$ 与内存中每一个点的几何距离。</li>
+    <li>挑选出距离 $X$ 最近的排行榜前 $K$ 位历史邻居（由参数 <code>k</code> 决定）。</li>
+    <li><strong>[Weighting 加权裁决]：</strong>检查 <code>distanceWeighting</code> 参数。如果不加权，前 $K$ 个人每人一票民主选举；如果启用了 <strong>Inverse Distance (距离倒数加权)</strong>，则给贴得最近的邻居施加极大的权重倍数 $w_i = \\frac{1}{d(x, x_i)}$，从而狠狠打压边缘偶然噪点的投票权。最后根据得票最高者定下 $X$ 的最终类标。</li>
 </ol>
-<ul>
-    <li><strong>核心参数 <code>k</code></strong>：设定近邻数，默认通常是 1。可以使用 Cross-validation 自动选择最佳的 $K$（通过设置 <code>crossValidate</code> 为 True）。</li>
-    <li><strong>参数 <code>distanceWeighting</code></strong>：默认是对前 $K$ 个邻居一视同仁。但如果设置距离倒数加权 (Inverse Distance)，那么虽然选了 5 个邻居，但距离你越近的那个邻居拥有越大的投票权：$w_i = \\frac{1}{d(x, x_i)}$。这能够极大削弱孤立噪点带来的负面干扰。</li>
-    <li><strong>时间换空间问题</strong>：为了解决查询慢的问题，WEKA 中的 IBk 允许配置底层的查找结构（如 <code>LinearNNSearch</code>, <code>KDTree</code>, <code>BallTree</code>）来将搜索复杂度降至 $O(\\log N)$。</li>
-</ul>
+
 <h3>🎯 Mock Exam 经典例题</h3>
 <p><strong>【Q1. 归一化与距离计算题】</strong>有三个样本拥有两个特征(Salary, Age)：$A(50000, 30)$，$B(60000, 40)$，新样本 $X(55000, 35)$。已知 Salary 的历史极小极大值是 $[10000, 110000]$，Age的极小极大值是 $[20, 70]$。请使用 Min-Max 归一化处理所有数据，并计算新样本 $X$ 距离 $A$ 和 $B$ 的欧氏距离。</p>
 <p><strong>【解答】</strong>:<br>
@@ -231,49 +248,34 @@ m05 = """
 <div class="highlight"><strong>核心考点：</strong>规则提取的极高解释性、Sequential Covering (分离并征服) 与分而治之的本质区别、RIPPER防止过拟合的 MDL 原则、WEKA中 JRip、PART的运作细节。</div>
 <h2>1. 基于规则分类的不可替代性</h2>
 <p>即使在神经网络(Black-box)大行其道的今天，Rule-Based 系统在金融风控、医疗拒保系统、法律定罪等领域依然是王者。因为一组精简的 <strong>IF-THEN 规则</strong> 具备人类可以直接阅读、审计、并强行进行局部删改的特点（即 <strong>Modular 模块化</strong> 与 <strong>Interpretable 解释性</strong>）。一棵庞大的决策树如果改动一个上层节点，整棵树都必须重构，而规则集可以直接禁用某一条不良规则。</p>
-<h2>2. 生成规则的两大范式</h2>
-<ul>
-    <li><strong>1. 间接生成 (Extract rules from Decision Trees)</strong>：<br>
-    使用 C4.5 生成一棵树，然后每一条从 Root 走到 Leaf 的路径就是一条巨长无比的规则。随后使用算法将路径上的无用判定条件修剪掉。</li>
-    <li><strong>2. 直接生成 (Sequential Covering / 顺序覆盖)</strong>：<br>
-    这就是著名的 <strong>Separate-and-conquer (分离并征服)</strong>。
-    <ol>
-        <li>在所有数据上，学习/生成出一条纯度、覆盖度最好的一条单独规则。</li>
-        <li><strong>Separate</strong>：将所有被这条规则正确捕捉到的实例，从训练集中彻底物理删除！</li>
-        <li><strong>Conquer</strong>：在剩余越来越少的数据集上继续学习下一条规则，直到数据全被覆盖。</li>
-    </ol>
-    这种方法与决策树的 Divide-and-conquer 最大的不同在于：决策树是在拆分子集，所有子集拼起来是一整棵树；而 Sequential covering 是学一条好规则，切走一块蛋糕，再学下一条。</li>
-</ul>
-<h2>3. 规则的覆盖冲突 (Conflict Resolution)</h2>
+<h2>2. 规则的覆盖冲突 (Conflict Resolution)</h2>
 <p>如果新来一个用户，他同时触发了 Rule 1 (判死刑) 和 Rule 2 (判无罪)，怎么办？</p>
 <ul>
     <li><strong>Size ordering</strong>：优先相信触发条件苛刻（前件更长更具体）的规则。</li>
     <li><strong>Class-based ordering</strong>：按类别的罕见性排序（比如优先判别为少数派欺诈类别）。</li>
     <li><strong>Rule-based ordering (Decision List)</strong>：将规则严格按优先级排成一个长长的 List。测试实例顺着 List 往下走，触发了哪条就立刻输出结果并停止验证后面的规则。WEKA 中的 JRip 产出的就是这种 Decision List。</li>
 </ul>
-<h2>4. WEKA 中的 Rule-Based 算法分析</h2>
-<table border="1" style="width:100%; border-collapse: collapse; margin-bottom: 20px;">
-    <tr><th>WEKA 算法</th><th>代表思想</th><th>运作原理与防止过拟合机制</th><th>优缺点</th></tr>
-    <tr>
-        <td><strong>PART</strong></td>
-        <td>结合 C4.5 的“部分决策树”</td>
-        <td>PART 也是走 Sequential Covering 流程，但是它在找“最好的单条规则”时，会在当前数据上建一棵 <strong>局部 C4.5 决策树</strong>。找到那条覆盖面积最广（最好）的叶子规则后，立刻抛弃整棵树。剔除对应数据，循环上述过程。</td>
-        <td>优点是不需要进行复杂的后续规则优化阶段 (Global optimization)，提取的规则极其纯净准确。缺点是反复造树再抛弃，计算量庞大。</td>
-    </tr>
-    <tr>
-        <td><strong>JRip (RIPPER)</strong></td>
-        <td>纯粹的增量式规则归纳</td>
-        <td>采用 <strong>FOIL (First Order Inductive Learner) 信息增益</strong>来生长规则。<br>
-        <strong>如何防过拟合？</strong> 使用 <strong>MDL (Minimum Description Length, 最小描述长度)</strong> 理论。系统实时监控新规则的描述长度（即模型复杂度），如果新增一条规则带来的正确率提升不足以抵消它增加的超过 64 bits 的冗长描述，算法立即终止。最后进行一系列替换和全局优化。</td>
-        <td>规则极其简洁，泛化能力极强，是直接生成规则的最先进算法之一。但在极其非线性的数据上，表达能力弱于复杂树模型。</td>
-    </tr>
-    <tr>
-        <td><strong>ZeroR</strong></td>
-        <td>Baseline (基线模型)</td>
-        <td>无视一切特征，直接猜测数据集中出现次数最多的那个类别。</td>
-        <td>绝对的最差基准，毫无准确率可言。如果任何复杂算法（如 JRip 或 J48）的准确率还不如 ZeroR，说明算法不仅没学到东西，还把数据搞砸了。</td>
-    </tr>
-</table>
+
+<h2>3. WEKA 纯血规则引擎：JRip 与 PART 核心算法流深度剖析</h2>
+<p>由于庞大的树结构一旦提取规则会导致重重冗余，规则流派选择了最血腥的 <strong>Separate-and-Conquer (分离并征服 / Sequential Covering)</strong> 工作流。</p>
+<p><strong>JRip (对应的原算法为 RIPPER) 的增量学习流:</strong></p>
+<ol>
+    <li>创建一个完全空白的黑板作为最终规则集。</li>
+    <li><strong>[Learn-One-Rule (学完一条)]</strong> 在当前场上所有还存活着的样本上，通过 <strong>FOIL 信息增益</strong> 不断添加 <code>AND</code> 判定条件，组装出一条针对某个目标类覆盖率最好、最完美的单薄规则。</li>
+    <li><strong>[防爆死阶段 (MDL Stopping)]</strong>：在拼装这唯一一条规则时，时刻监控模型体积。一旦发现加上新条件带来的识别正确率，弥补不了它导致模型位宽膨胀超过 <strong>64 bits 最小描述长度 (MDL)</strong> 的惩罚，算法立刻叫停，这条规则正式出炉。</li>
+    <li><strong>[Remove-Covered (拔草除根)]</strong>：去训练集中，将刚才这条好规则能够覆盖抓取出来的所有样本，<strong>彻彻底底地物理删除隔离</strong>！</li>
+    <li>回到步骤2，只盯着那些依然没有被提取规律的顽固样本，继续长出一条新规则。直到场上没有任何样本剩下。</li>
+    <li>最终进入 <strong>Global Optimization (全局大修剪)</strong> 阶段，将各个单点生长的规则整合去重，生成有序的 Decision List。</li>
+</ol>
+
+<p><strong>PART 算法流 (借刀杀人的暴力美学):</strong></p>
+<ol>
+    <li>在当下的全量数据上不慢吞吞找规则，而是直接调用底层的 C4.5 (J48) 代码，在原地拔地而起一棵庞大复杂的 <strong>局部部分决策树 (Partial Decision Tree)</strong>。</li>
+    <li>在这棵树上的成百上千个分岔树叶中，仅仅寻找那一条 <strong>纯度最纯、覆盖样本面积最大</strong> 的那一条黄金路径。将其直接扯断下来，翻译成 <code>IF...THEN...</code> 规则加入集合。</li>
+    <li>紧接着做出令人发指的动作：<strong>立刻把这棵刚建好的大树丢进垃圾桶抛弃 (Discard the tree)！</strong></li>
+    <li>将这条黄金规则覆盖到的实例从数据集中删除。回到步骤1再次种树。这种“杀鸡用牛刀”的方式虽然算力损耗恐怖，但提取出的规则纯净度惊人。</li>
+</ol>
+
 <h3>🎯 Mock Exam 经典例题</h3>
 <p><strong>【Q1. 算法执行流程考点】</strong>请阐述 JRip（WEKA中的 RIPPER 算法）是依靠什么底层的停止机制来防止提取出来的规则集过于庞杂、死记硬背而导致过拟合的？</p>
 <p><strong>【解答】</strong>: JRip 依靠 <strong>MDL (Minimum Description Length, 最小描述长度)</strong> 原则作为它的核心停止机制 (Stopping criterion)。在执行 Sequential Covering (逐步增加新规则) 或扩充某条规则前件时，算法会实时监控这套规则在理论上的“位宽/信息体积”。如果最新加入的一条规则虽然略微提高了训练集的纯净度，但它带来的模型长度扩充超过了容忍的惩罚阈值（通常设定为 64 bits），系统就会认定得不偿失，立刻叫停该规则的生长以保持模型的泛化能力。</p>
@@ -288,24 +290,41 @@ m06 = """
 <h2>1. 为什么要使用集成方法？(Ensemble Philosophy)</h2>
 <p>单一的分类器往往具有不可逾越的瓶颈：浅层决策树虽然稳健但 <strong>偏差 (Bias)</strong> 极高，只能划出四四方方的决策块（欠拟合）；深层决策树虽然拟合力强，但极其容易被局部噪声诱导，<strong>方差 (Variance)</strong> 极高，泛化一塌糊涂。<br>
 <strong>Ensemble (集成)</strong> 的哲学是：将多个相互独立且具有 <strong>多样性 (Diverse)</strong> 的弱基分类器结合起来，能够平滑噪声降低方差，或串联纠错降低偏差，从而打破单一算法的性能天花板。这也是所有 Kaggle 竞赛中的屠榜利器。</p>
-<h2>2. Bagging (Bootstrap Aggregation - 装袋法)</h2>
-<p>Bagging 的核心目标是：<strong>拯救那些方差极高、极易过拟合的算法（比如不剪枝的深层决策树、KNN）</strong>。通过多数人的力量把不稳定的预测给“拉平”。</p>
-<ul>
-    <li><strong>工作原理</strong>：采用 <strong>Bootstrap (有放回随机抽样)</strong>。如果原数据集有 N 个样本，每次都有放回地抽 N 次组成一个新数据集。因为是有放回，每个新数据集里都会有重复数据，同时有大约 36.8% 的原数据（Out-of-Bag, OOB 数据）根本没被抽到。用这 M 个稍微不同的新数据集，独立训练出 M 个基分类器。</li>
-    <li><strong>融合策略</strong>：由于 M 个分类器完全独立（可以并行计算），对于分类问题，进行 <strong>多数投票 (Majority Voting)</strong>；对于回归问题，进行求平均。</li>
-    <li><strong>结论</strong>：由于各个基模型是独立的，求平均后方差极大地降低了。如果个别树对噪声过拟合，投票时它们会被其他正常的树淹没掉。</li>
-</ul>
-<h2>3. Random Forest (随机森林) - WEKA 中的绝对主力</h2>
-<p>随机森林是 Bagging 的终极形态。它敏锐地发现：即便使用了 Bootstrap 数据，但如果数据里有几个强相关的核心特征，那么长出来的 M 棵树还是会长得一模一样，缺乏最重要的 <strong>多样性 (Diversity)</strong>。<br>
-<strong>RF 的突破性操作</strong>：在建每一棵树的过程中，当要在某个节点寻找最佳切分属性时，算法 <strong>不看所有的属性</strong>，而是 <strong>随机挑出一个包含 K 个特征的子集</strong>（通常 $K = \\log_2(总特征数)$），只在这个狭窄的子集里找最优分割！这强制逼迫原本长相相同的树走上不同的发展路径，彻底打断了树与树之间的相关性。</p>
-<h2>4. Boosting (提升法 - AdaBoost)</h2>
-<p>如果说 Bagging 是为了降方差，那么 Boosting 的核心目标是 <strong>拯救那些偏差极高、根本学不会复杂模式的“弱智”分类器（如 Decision Stump, 决策树桩，只裂开一层的树）</strong>，即降低偏差 (Reduce Bias)。</p>
-<ul>
-    <li><strong>串行纠错原理</strong>：Boosting 无法并行。它训练好第一棵基分类器后，去检查哪些样本被分错了。在训练第二棵分类器时，系统会 <strong>人为地给那些第一棵树分错的困难样本施加极高的权重 (Weights)</strong>。这意味着第二棵树会被迫专注于纠正前人的错误。依次类推，第 M 棵树专治前面所有人的疑难杂症。</li>
-    <li><strong>AdaBoost (Adaptive Boosting)</strong>：最著名的 Boosting 算法。在最后整合所有的弱分类器时，它不会使用民主平等的多数投票。而是给在训练集上总错误率低的基分类器极高的 <strong>发言权权重</strong>，给经常出错的分类器极低的权重。进行 <strong>加权多数投票 (Weighted Majority Voting)</strong>：最终预测为 $H(x) = sign\\left(\\sum_{m=1}^M \\alpha_m h_m(x)\\right)$，其中 $\\alpha_m$ 为分类器的权重。</li>
-</ul>
-<h2>5. Stacking (堆叠)</h2>
-<p>Stacking 是一种更为高阶的融合法。在 WEKA 中，你可以把 J48、KNN、Logistic Regression 分别跑一遍，它们各自会给出一个预测结果（如分类概率）。Stacking 把这些基础算法输出的预测概率 <strong>当作新的输入特征</strong>，喂给最高层的一个 <strong>元分类器 (Meta Classifier)</strong>，让元分类器自己去学习到底该相信谁在什么情况下的判断。这是一种机器自己学习如何融合结果的黑科技。</p>
+
+<h2>2. WEKA 集成神阵：四大融合算法执行流</h2>
+<p><strong>Bagging (Bootstrap Aggregation 装袋法) 算法流：解决高方差 (Reduce Variance)</strong></p>
+<ol>
+    <li>设原始数据库拥有 $N$ 条样本。启动 $M$ 次平行的随机线程。</li>
+    <li><strong>[Bootstrap 抽样]</strong>：每个线程在数据库里进行 <strong>有放回的抽取</strong> $N$ 次，拼凑出一块新数据集（注：约 36.8% 的原数据永远没被抽中，形成 OOB 数据）。</li>
+    <li>每个线程拿着自己手上的新数据，互相不知道对方存在，独立地疯狂生长出一棵不受限制的高复杂基础分类器（如深树、KNN）。</li>
+    <li><strong>[Voting 民主融合]</strong>：新样本降临，这 $M$ 棵极易过拟合的基分类器全体发言。如果是分类则采用 <strong>多数投票 (Majority Voting)</strong>，如果是回归则全盘 <strong>取平均 (Average)</strong>。此时奇迹发生：个别极端噪点引发的错误在平均下彻底被浩荡票数淹没，全局方差产生指数级崩塌。</li>
+</ol>
+
+<p><strong>Random Forest (随机森林) 算法流：解决 Bagging 树同质化的极致升华</strong></p>
+<ol>
+    <li>完全继承上文 Bagging 的 Bootstrap 随机抽人法则。</li>
+    <li>但是！当每棵树进入生长阶段，正准备找那个带来最大纯度 Gain 的特征时，算法 <strong>蒙住它的眼睛</strong>，不许它看全场所有的特征列！</li>
+    <li>只允许它从所有特征中随机摸取一个小碎片子集（数量通常为 $\\log_2(总特征数)+1$）。</li>
+    <li>树只能在这个随机挑选出来的残缺特征群中，勉为其难挑选出最好的一个去劈出树根。这导致原本会长得一模一样的森林，被强行分散出了极富多变、千奇百怪的独特变异物种，为最终集成平滑带来了 <strong>无与伦比的多样性 (Diversity)</strong>。</li>
+</ol>
+
+<p><strong>AdaBoost (Adaptive Boosting) 算法流：解决高偏差 (Reduce Bias) 的专科庸医拯救者</strong></p>
+<ol>
+    <li>绝对不允许并行！它必须将一群只会画一条线（如单层决策树桩 Decision Stump）的低智分类器排成一个单线纵队。一开始，所有的样本都被分配极其平等的初始权重。</li>
+    <li><strong>[ Sequential Learning 逐个传功]</strong>：第一棵弱智树开始学习，由于它很笨，它分错了一堆离群高难样本。</li>
+    <li>系统立刻震怒：把这些被分错的考题，其 <strong>难度权重强行提升数倍 (Increase weight for misclassified instances)</strong>。</li>
+    <li>轮到第二棵弱智树登场，它看着这些权重冲天的高难考题，被迫拼死专注地去迎合纠正这批错题的命运规律。接着它也分错了部分，于是这部分继续加权传给第三棵树。这叫 <strong>专注弥补前任过错机制</strong>。</li>
+    <li><strong>[Weighted Voting 独裁投票]</strong>：测试来临，这排纵队全员投票，但不是人人一票！系统对在当时训练时 <strong>整体加权错误率低</strong> 的优秀生赋予极度夸张的决策发言权 ($\\alpha_m = \\frac{1}{2} \\ln \\left(\\frac{1-\\epsilon}{\\epsilon}\\right)$)，而总是出错的树发言形同放屁。最终用这种强硬的专治力量扭曲出极高拟合深度的非线性边界。</li>
+</ol>
+
+<p><strong>Stacking (高阶套娃) 算法流:</strong></p>
+<ol>
+    <li>不再用同一种算法，你可以第一层摆上完全不搭嘎的三种魔法：一个 J48 树、一个 IBk 和一个 NaiveBayes 贝叶斯。</li>
+    <li>给同一个测试样本喂给他们，三个人分别大喊出各自的判定胜率（如 0.9, 0.2, 0.7）。</li>
+    <li><strong>最恐怖的一步：将这三个数字直接打包装袋，作为 3 个全新的输入特征 (New Features)</strong>。</li>
+    <li>把它们喂给位高权重的最高统帅——<strong>元分类器 (Meta Classifier)</strong>，让它依靠机器学习直接吃透到底该听信谁的谎言与真话。</li>
+</ol>
+
 <h3>🎯 Mock Exam 经典例题</h3>
 <p><strong>【Q1. 加权公式推演题】</strong>在 AdaBoost 中，如果第 $m$ 棵基分类器（Decision Stump）的加权错误率 $\\epsilon_m$ 被算出来等于 0.2，请问分配给这棵树的发言权权重 $\\alpha_m$ 是多少？（仅需写出计算公式的代入过程）</p>
 <p><strong>【解答】</strong>:<br>
@@ -328,22 +347,24 @@ m07 = """
 <p>理想情况下，我们应该基于自然界万物的“真实联合概率分布”去寻找能够让“期望风险 (Expected Risk)”最小的分类器。<br>
 但在现实世界中，真实的整体分布是不可知的，我们手中只有几百上千条的 <strong>有限样本抽样</strong>。因此所有机器学习算法退而求其次，只能去最小化这些已知样本上的错误率，即 <strong>经验风险最小化 (ERM)</strong>。<br>
 这就是过拟合诞生的根本原因：由于 ERM 是在迎合那部分有限的样本均值，如果你的算法过于贪婪或缺乏正则化约束，它就会将这部分有偏差的局部样本特征当作宇宙真理去拟合。</p>
-<h2>3. 估算真实性能的方法大盘点 (Performance Estimation)</h2>
-<p>既然不能用训练集的准确率骗自己，我们必须切出独立的数据来检验模型：</p>
-<ul>
-    <li><strong>Holdout Method (保留法 / 切分法)</strong>：直接将数据按照 7:3 的比例随机切分为训练集和测试集（或加入验证集 Validation set 用于调参）。<br>
-        <strong>劣势</strong>：一刀切的方式极具偶然性。如果“大乐透”式地把最难辨认的样本全分进了测试集，模型会被低估；如果测试集全是简单题，模型会被高估。</li>
-    <li><strong>Stratification (分层抽样)</strong>：这是极其关键的改进。在 Holdout 时，不是盲目纯随机切，而是强制保证 <strong>测试集和训练集中的类别比例必须与原始数据集完全一致</strong>。例如，原始数据里肿瘤阳性占 5%，那么抽出来的训练集和测试集中，阳性比例也必须严格卡死在 5%。在 WEKA 的评估中，分层是默认开启的核心操作。</li>
-    <li><strong>Cross-Validation (交叉验证 / K-Fold CV)</strong>：将数据分成 $K$ 个不重叠的等份 (Folds)。循环 $K$ 次，每次轮流挑出第 $i$ 份作为测试集，剩下 $K-1$ 份合并作训练集。最后把 $K$ 次测试结果求平均。这是目前学术界公认最严谨、方差最小的评估方式。通常采用 10-Fold CV。</li>
-</ul>
-<h2>4. 63.2 Bootstrap 的数学机理</h2>
-<p>当数据集 <strong>极其稀少</strong> (只有几十条数据) 时，我们根本舍不得划出 1/3 去做不能参与训练的测试集。此时使用 <strong>Bootstrap</strong>。<br>
-它通过 $N$ 次 <strong>有放回的随机抽样 (Sampling with replacement)</strong> 构造出一个包含 $N$ 条数据的新训练集。</p>
-<p><strong>极其高频考点推导</strong>：<br>
-在有放回抽样中，某一条特定样本在 1 次抽取中 <strong>没有被抽中</strong> 的概率是 $\\left(1 - \\frac{1}{N}\\right)$。<br>
-那么在 $N$ 次连抽中，它始终没有被抽进训练集的概率是 $\\left(1 - \\frac{1}{N}\\right)^N$。<br>
-根据高等数学极限，当 $N$ 趋于无穷大时，概率趋近于 $\\lim_{N \\to \\infty} \\left(1 - \\frac{1}{N}\\right)^N = \\frac{1}{e} \\approx 0.368$。<br>
-这意味着，构造出来的训练集中，其实只含有大约 <strong>63.2% 的不重复原始样本</strong>！而剩下那 <strong>36.8% 被天生过滤掉的、没有被污染的原生样本 (Out-of-Bag 样本)</strong>，就完美顺理成章地被拿来充当纯净的 Test Set，从而在极端小样本的情况下榨取最大化的数据评估价值。</p>
+<h2>3. WEKA 数据分割验证引擎流分析</h2>
+<p>既然不能用训练集的准确率骗自己，在 WEKA 中提供了多套引擎流程来隔绝测试数据：</p>
+<p><strong>Cross-Validation (交叉验证 / K-Fold CV) 核心调度流:</strong></p>
+<ol>
+    <li>为了绝对公平且榨干所有的数据集潜力，如果设定 10-Fold CV，WEKA 会将整个盘子里的原始数据严格切割为 <strong>10 个不互斥重叠的等额块 (Folds)</strong>。</li>
+    <li>并且在切割时，它默认激活 <strong>Stratification (分层机制)</strong>：即死死卡住每个块中的类别分布。如果全体里绝症占 1%，那么这切出来的 10 个块里每一个的绝症都只能精准占到 1%，避免了全员正常人的废块。</li>
+    <li>执行长达 10 轮的疯狂大风车旋转。在第 $i$ 轮时，抽出第 $i$ 个块单独封存为不给模型看到的 Test Set，然后把剩下的整整 9 块缝合在一起拿去给分类器喂料训练。</li>
+    <li>10轮完毕后，每一块都被拿来单独测过一次。将这 10 个独立测试结果取数学平均值，从而获得了最抗压、方差最低的模型真实泛化分数。</li>
+</ol>
+
+<p><strong>63.2 Bootstrap 评估引擎的极限求生法则:</strong></p>
+<ol>
+    <li>如果数据集小到连 10-Fold CV 都嫌浪费数据怎么破？WEKA 此时激活 Bootstrap。</li>
+    <li>它通过极度无赖的 <strong>有放回随机抽样 (Sampling with replacement)</strong> 狂抽 $N$ 次。</li>
+    <li><strong>极其高频考点推导</strong>：在有放回抽样中，某一条特定样本在 1 次抽取中 <strong>没有被抽中</strong> 的概率是 $\\left(1 - \\frac{1}{N}\\right)$。那么在 $N$ 次连抽中，它始终没有被抽进训练集的概率是 $\\left(1 - \\frac{1}{N}\\right)^N$。根据极限，当 $N \\to \\infty$ 时，概率趋近于 $\\frac{1}{e} \\approx 0.368$。</li>
+    <li>结果就是，被系统生成的“训练池”虽然体积是 100%，但它里面全是重影翻新的多胞胎，只包含大概 <strong>63.2% 的不重复纯净原始原核样本</strong>。</li>
+    <li>而刚才被公式推导遗落在荒野的那 <strong>36.8% 的 Out-of-Bag (OOB) 绝版样本</strong>，由于根本没沾染过训练集的气息，被顺理成章地拿来直接当 Test Set 考验模型。</li>
+</ol>
 <h3>🎯 Mock Exam 经典例题</h3>
 <p><strong>【Q1. 计算推演题】</strong>某医疗研究机构仅收集到了 100 份罕见病样本进行数据挖掘。如果采用传统 Holdout，测试集过小会导致评估严重失真，于是他们决定采用 63.2% Bootstrap 策略。请问他们必须在原库中执行多少次“有放回抽样”来组建训练集？在这些生成的训练集中，预期会有多少条其实是互不相同的独特样本？剩下的那部分原本没被抽中的孤立样本被拿去做什么用？</p>
 <p><strong>【解答】</strong>:<br>
@@ -366,15 +387,17 @@ m08 = """
 <p>如果商店有 1000 件商品，其可能的所有组合多达 $2^{1000}$ 种。去数据库中挨个查询这些组合出现的次数是不可能的。为了打破组合爆炸 (Combinatorial explosion)，引入了 <strong>Apriori 先验性质 (Downward Closure / 反单调性)</strong>：<br>
 <strong>核心真理：一个频繁项集的所有非空子集也必然是频繁的！</strong><br>
 <strong>极其凶残的剪枝推论</strong>：如果你去数据库查了一遍，发现连单独买 {啤酒} 的交易都达不到最小支持度阈值（它不是频繁1项集），那么无论你往里面加什么，{啤酒, 尿布}、{啤酒, 牛奶} <strong>绝不可能是频繁的</strong>。这意味着后续庞大的包含啤酒的组合树可以直接被彻底整枝抛弃 (Pruned)！</p>
-<h2>3. Apriori 的 Join & Prune (连接与剪枝算法步骤)</h2>
-<p>Apriori 是一个逐层搜索迭代的算法，寻找 $k$ 维频繁项集：</p>
+
+<h2>3. WEKA 中 Apriori 关联引擎的核心闭环提取流</h2>
+<p>Apriori 是一个以暴制暴、逐层攀升迭代的算法引擎，它要挖掘出所有高于门槛底线的项集：</p>
 <ol>
-    <li><strong>Scan 1</strong>：第一次扫描全库，统计出所有单一商品出现的次数，剔除不足阈值的，留下 <strong>频繁 1-项集 ($L_1$)</strong>。</li>
-    <li><strong>Join (连接生成候选)</strong>：使用现有的频繁 $k-1$ 项集 ($L_{k-1}$) 互相连接，生成下一维度的 <strong>候选 $k$-项集 ($C_k$)</strong>。</li>
-    <li><strong>Prune (基于先验性质剪枝)</strong>：极其关键的一步！在 $C_k$ 集合中，遍历每个候选项的所有 $k-1$ 维子集。只要发现它的 <strong>任何一个子集</strong> 不存在于之前的频繁集 $L_{k-1}$ 中，立刻将这个侯选项从 $C_k$ 中删除。</li>
-    <li><strong>Filter & Count</strong>：对留存的精英 $C_k$ 再次去扫描真实数据库，计算真实的支持度计数。达标的正式成为 $L_k$。</li>
-    <li>重复，直到某一代再也产生不了候选项为止。</li>
+    <li><strong>[Initial Scan] 扫描发源</strong>：第一次大范围盘点整个数据库的流水清单，统计出所有单一商品出现的次数，冷酷无情地用 <code>Min_Support</code> 参数将达不到频率基线的货品清盘踢出。留下的胜者被记录在第一代 <strong>频繁 1-项集 ($L_1$)</strong> 名册中。</li>
+    <li><strong>[Join 内部联姻]</strong>：此时不再碰数据库。让系统刚拿到的上一代频繁集合 $L_{k-1}$ 内部开始互相两两相亲拼接，通过自我组合生成出比它高一维度的 <strong>候选拼接集 $C_k$</strong>。</li>
+    <li><strong>[Prune 极端大屠杀剪枝]</strong>：这正是该引擎性能神话的阵眼。针对 $C_k$ 名单上的每一条候选组合条目，算法会让它分裂出自己所有的降维 $(k-1)$ 级分身子集。如果系统在这个分身里 <strong>只要发现哪怕有一只眼生的小鬼</strong> 根本不存在于上一代的贵族名单 $L_{k-1}$ 里面，那么根据伟大的反单调性铁律，这个候选条目全家立刻被直接在 $C_k$ 中 <strong>彻底删除抹杀 (Prune)</strong>！</li>
+    <li><strong>[Validation 二次过滤]</strong>：只有经历了大屠杀没被波及幸存下来的纯血 $C_k$ 组合，系统才舍得浪费读写性能，带着它们 <strong>第二次钻进原始数据库</strong> 去扫表数数，看看它们到底齐不齐，满足门槛的，封为当代的真正大统领 <strong>$L_k$</strong>。</li>
+    <li>只要 $L_k$ 还没绝种空城，升维令 $k = k+1$，无休止地跳回第二步 <code>Join</code> 再次厮杀拼接。</li>
 </ol>
+
 <h2>4. 高维项集的存储灾难与压缩技术 (Maximal & Closed)</h2>
 <p>如果找到一个极其长的频繁模式（包含 100 件商品），那么它的子集就有极大数量（$2^{100}$），这些子集按照定理全都是频繁的。内存会直接爆炸。为了压缩空间，我们只保存最具代表性的项集：</p>
 <ul>
@@ -387,6 +410,7 @@ m08 = """
 但如果在全局数据库中，不论你玩不玩游戏，人类总群体买 iPhone 的概率本身就是 95%！<br>
 也就是说，玩游戏不仅没有促进你买 iPhone，反而拉低了你买 iPhone 的概率（从 95% 降到 90%）。此时的高置信度是一种虚假的因果错觉。<br>
 因此在 WEKA 的 Apriori 实现中，除了 Support 和 Confidence，还会提供 <strong>Lift (提升度)</strong> 作为补充：$Lift(X, Y) = \\frac{P(X \\cup Y)}{P(X) \\times P(Y)}$。只有 $Lift > 1$，才代表 X 对 Y 是具有真实促进作用的强正相关关系。</p>
+
 <h3>🎯 Mock Exam 经典例题</h3>
 <p><strong>【Q1. 置信度与提升度公式连发】</strong>在某个拥有 100 条流水记录的超市数据库中，顾客单买了面包的有 40 条，单买了黄油的有 50 条，而面包和黄油被同时购买了 30 条。<br>
 请你手算出提取的关联规则 <code>{面包} -> {黄油}</code> 的 Support, Confidence, 以及证明这是否是一个具有正向促进意义的强相关推荐规则 (Lift)。</p>
@@ -405,14 +429,18 @@ m09 = """
 <div class="highlight"><strong>核心考点：</strong>聚类思想的根本区别、K-Means质心更新推导及其面对非凸形状与异常点的脆弱性、三种层次聚合的 Linkage 计算差异与不可逆缺陷、WEKA 中的具体实现探讨。</div>
 <h2>1. 聚类分析背景与划分流派 (Partitioning Methods)</h2>
 <p>分类算法拥有预先标记的 Ground Truth，而聚类 (Clustering) 是纯粹的无监督学习，它盲人摸象式地试图根据对象自身的内部属性（如几何距离），将数据集分割为 $K$ 个组，使得 <strong>簇内高度内聚，簇间极其疏远</strong>。</p>
-<h3>K-Means 算法运转逻辑：</h3>
+
+<h2>2. WEKA 中的 SimpleKMeans 质心吸扯流引擎</h2>
+<p>作为最经典的中心辐射流算法，它在 WEKA 中的名为 <strong>SimpleKMeans</strong>，其每轮迭代步骤被固化为如下逻辑：</p>
 <ol>
-    <li>在茫茫数据海中随机空投 $K$ 个质心 (Centroids)。</li>
-    <li>计算每一个样本到这 $K$ 个质心的欧氏距离，把它强行分配给最近的质心领地。</li>
-    <li>根据刚刚分配过来的这批小弟，重新计算它们的坐标平均值 $\\mu_i = \\frac{1}{|C_i|} \\sum_{x \\in C_i} x$，将其作为新的质心坐标。</li>
-    <li>质心位置变动，原本边界上的一些小弟发现别的质心离自己更近了，导致下一轮领地划分重组。不断迭代，直到所有质心被小弟们固定住，再也无法移动（$SSE = \\sum_{i=1}^K \\sum_{x \\in C_i} ||x - \\mu_i||^2$ 方差和极小值收敛）。</li>
+    <li>在茫茫高维数据海中，闭着眼睛 <strong>随机空投挑出</strong> $K$ 个倒霉的特征点作为初始的镇山之石 (Centroids)。</li>
+    <li><strong>[Assignment 无脑收编环节]</strong>：它跑遍全服所有的点，逼着所有人用欧氏距离标尺去量自己跟这 $K$ 个大哥的物理距离，谁离得最近，它立刻就被强行盖下烙印，归入对应质心的旗下领地 $C_i$。</li>
+    <li><strong>[Update 权力移交洗牌]</strong>：全员刚刚认完阵营，K-Means 立刻在各个局部阵营里内部收割统计。它算出每一个阵营大圆内所有小兵小将特征坐标位置的 <strong>绝对中心原点 (几何平均坐标 Mean, $\\mu_i$)</strong>。接着，原本的大哥直接被废黜卸任，质心信物被移交给这个全新的虚无中心均值点！</li>
+    <li>由于新大哥的位置发生了平移跑动，原先边防线上的人一照镜子，发现隔壁家的那个新大哥竟然离自己更近！这引发了疯狂的阵营哗变倒戈。</li>
+    <li>这套 Assignment 和 Update 双重循环永动不休。直到某一次 Update 后，新均值跟老质心竟然丝毫不差一动没动，整个阵营再无一人叛变（即整体离差平方和 <strong>$SSE$ 方差极小值彻底收敛固化 Converged</strong>），系统强制鸣金停跑，吐出最终划分格局。</li>
 </ol>
-<h3>K-Means 的四大致命死穴 (Limitations) 考点：</h3>
+
+<h3>SimpleKMeans 的四大致命死穴 (Limitations) 考点：</h3>
 <ul>
     <li><strong>对初始落点极度敏感</strong>：纯随机初始化很容易让两个质心降落在同一个自然簇中，导致它陷入毫无意义的 <strong>局部最优解 (Local Optimum)</strong>。在 WEKA 中，SimpleKMeans 往往需要配合 K-Means++ 的聪明初始化或进行多次随机重启取最优。</li>
     <li><strong>无法捕捉非球形结构 (Non-convex bias)</strong>：K-Means 的距离分配和均值运算，使其潜意识里认定簇的形状必须是完美的球体/凸形。面对现实世界中环套环、S形、或两条平行线形态的簇，它会直接一刀切碎，彻底崩坏。</li>
@@ -420,9 +448,10 @@ m09 = """
     <li><strong>对离群噪声 (Outliers) 毫无抵抗力</strong>：一个处于几千公里之外的错误噪点被强行归入某簇后，在计算均值时会像杠杆一样极其剧烈地将整个质心拉扯向深渊。<br>
     <strong>应对方案：K-Medoids 算法 (PAM)</strong>，它不允许计算虚空的均值质心，而是强制挑选当前簇内最居中的那个 <strong>真实的实体样本</strong> 作为中心。这就好比中位数对抗平均数，极大压制了离群噪点的杠杆效应。</li>
 </ul>
-<h2>2. 层次流派 (Hierarchical Clustering)</h2>
-<p>划分聚类生硬地将数据拍成扁平的 K 块，而层次聚类无需你提前告诉它 K 是多少。它像堆雪人一样，自底向上 <strong>凝聚 (Agglomerative, AGNES)</strong>，最终生成一棵如进化树一般的层次树 (Dendrogram)。你可以像切洋葱一样在任何高度横向切一刀，得到任意数量的簇划分。</p>
-<h3>核心考点：决定两个多边形簇之间“距离”的三大几何判定法：</h3>
+
+<h2>3. 层次流派的雪人堆叠法 (Hierarchical Clustering)</h2>
+<p>划分聚类生硬地将数据拍成扁平的 K 块，而层次聚类无需你提前告诉它 K 是多少。在 WEKA 里被归为 <code>HierarchicalClusterer</code>。它自底向上 <strong>凝聚 (Agglomerative, AGNES)</strong>，一开始每个人都是独狼。每次循环，它都在天地间寻找看起来距离最近的两个组，将它们吞并结合。一步步直到最终所有的数据汇流成一棵宏大的 <strong>层次进化树 (Dendrogram)</strong>。随后人只要随便在高度上砍一刀，想切几个簇就切出几个簇。</p>
+<h3>核心考点：决定两个多边形簇群之间“距离”的三大几何判定法：</h3>
 <ul>
     <li><strong>Single-linkage (单链法 / 最短距离)</strong>：取簇 A 与簇 B 中互相靠得 <strong>最近</strong> 的那对成员作为代表，以此计算两个庞大簇群的间距：$d(A, B) = \\min_{x \\in A, y \\in B} d(x, y)$。<br>
     <strong>巨大缺陷</strong>：这会使得算法极度偏爱长条形、蛇形蔓延的聚类。如果两团互不相干的人群中间碰巧散落了几个噪点，单链法会通过这些噪点“搭桥”，将两组毫不相干的人硬生生粘成一团。这就是著名的 <strong>链式效应 (Chaining phenomenon)</strong>。从图论上讲，这种聚合过程完全等价于 Kruskal 的 <strong>最小生成树 (MST)</strong> 连线。</li>
@@ -430,6 +459,7 @@ m09 = """
     <li><strong>Ward's Method (沃德方法)</strong>：它完全抛弃了点对点的死板距离。它假想：如果我把这两个簇合并，整体系统的变异度（方差增量）会增加多少？它总是优先合并那些合并后使得总系统混乱度增加最小的、看起来最门当户对的两个组。</li>
 </ul>
 <p><strong>层次聚类无法挽回的悲剧</strong>：无论你用上述哪种链式方法，层次聚类具有一种宿命论缺陷——<strong>不可逆转 (Irreversible)</strong>。一旦算法在早期的底层迭代中做出了错误的合并决定，它将永远无法拆开这个错误组合，错上加错直至顶端。</p>
+
 <h3>🎯 Mock Exam 经典例题</h3>
 <p><strong>【Q1. 算法流演练题】</strong>简述 K-Means 算法每一轮核心迭代中所执行的两个具体数学推导步骤，以及它是如何判断应该“收工停跑”的？</p>
 <p><strong>【解答】</strong>:<br>
@@ -449,24 +479,28 @@ m10 = """
 <h2>1. 打破球形迷信：密度聚类的哲学动机</h2>
 <p>K-Means 只认同以几何质心为圆心的完美球状簇，层次 Single-linkage 则容易被随机散布的孤立噪点骗去搭桥。有没有一种方法，既能识别像盘山公路一样弯曲的任意非凸形状簇 (Non-convex)，又能在面对漫天噪点时铁面无私地将它们无视？<br>
 答案是 <strong>Density-Based (基于密度的聚类)</strong>。该流派认为，簇的本质是空间中被一大片“荒漠区域”隔开的一块块“高密度人口聚集区”。只要人口密度一直连绵不断，无论这片居住区形状多么奇特怪异，它都算作同一个簇群。</p>
-<h2>2. DBSCAN 的内功心法与核心实体</h2>
-<p>DBSCAN 依赖两个至关重要的超参数：<br>
-1. <strong>Eps ($\\epsilon$)</strong>：探测雷达的辐射范围（邻域半径）。<br>
-2. <strong>MinPts</strong>：想要成立一个“据点”，在这片邻域内必须包含的最低人口指标（最小样本数，包含自己）。</p>
-<h3>数据实体的三六九等判定：</h3>
+
+<h2>2. DBSCAN 雷达波探测大阵执行流</h2>
+<p>在 WEKA 中的 <strong>DBSCAN</strong> 高度依赖两个至关重要的雷达控制台参数：<br>
+1. <strong>Eps ($\\epsilon$)</strong>：探测雷达探测距离的极限辐射半径。<br>
+2. <strong>MinPts</strong>：想要拥有资格成立一个新山头“据点”，在你自己这片雷达范围内必须凑齐的最低人口底线要求（包含你自己）。</p>
+<h3>数据实体的三六九等阶级定性法则：</h3>
 <ul>
-    <li><strong>Core points (核心点)</strong>：王者级别。如果样本拉开 Eps 雷达扫描，发现圈内的人数 $\\ge MinPts$，它立刻晋升为核心点，成为繁华市区的基石。</li>
-    <li><strong>Border points (边界点)</strong>：边缘角色。它拉开雷达发现圈内人数惨淡，根本不够 MinPts 指标，无法自立门户。但是，极其幸运的是，它 <strong>刚好处于某一个核心点的雷达辐射圈内</strong>。因此，它被核心点强行收编，成为该聚类簇的边界护城河。</li>
-    <li><strong>Noise (噪声点)</strong>：流放者。自己雷达圈内人数极少，同时也悲惨地没有被任何核心点的势力范围所覆盖。DBSCAN 将其无情打上 Noise 标签丢弃。这就是它 <strong>天生拥有强大抗噪鲁棒性</strong> 的奥秘。</li>
+    <li><strong>Core points (核心点)</strong>：最强王者级。如果某个样本点拉下开关让 Eps 雷达旋转一圈扫描，统计发现被照到的圈内人数 $\\ge MinPts$，恭喜它，立刻黄袍加身晋升为“核心点”，成为搭建市中心商圈的绝对基石。</li>
+    <li><strong>Border points (边界点)</strong>：随风倒边缘配角。它拉开雷达发现圈内人数惨淡，根本不够 MinPts 指标，完全没有自立门户的资质。但是，极其幸运的是，它 <strong>刚好被包裹在了某个王者级核心点打出来的强力 Eps 辐射圈内</strong>！因此，它被核心点直接顺手牵羊强行收编，委派去看守该聚类簇的最外围边界护城河，并被尊称为“边界点”。</li>
+    <li><strong>Noise (噪声点)</strong>：惨遭流放者。自己雷达圈内人数极少废墟一片，同时也悲惨地没有被大地图上任何一个核心点的势力范围所搭救覆盖。DBSCAN 直接将其判定打上冷酷的 Noise 废品标签彻底封存。这就是它 <strong>天生拥有强大抗噪鲁棒性、不被单点污染带偏整体</strong> 的核心奥秘所在。</li>
 </ul>
-<h3>组建帝国的规则 (DBSCAN执行流)：</h3>
+<h3>组建庞大帝国的顺藤摸瓜流（DBSCAN完整执行环）：</h3>
 <ol>
-    <li>标记所有点 <strong>Unvisited</strong>。随机挑一个标记 Visited。</li>
-    <li>打开雷达，扫出距离 $\\le Eps$ 的邻居。</li>
-    <li>如果邻居 $\\ge MinPts$，该点封神为 <strong>Core Point (核心点)</strong>。建新簇 $C$。</li>
-    <li>通过 <strong>Density-reachable (密度可达)</strong> 顺藤摸瓜，遍历它所有邻居，如果邻居也是核心点，就把邻居的邻居全拉进 $C$。拔出萝卜带出泥。</li>
-    <li>如果邻居 $< MinPts$，打上 <strong>Noise (噪声)</strong> 标签无情抛弃。</li>
+    <li>系统启动！一上来二话不说，将地图上所有几百万个点全服打上 <strong>Unvisited (未探索蒙昧地带)</strong> 的冰冷标记。然后，神明降临，随便凭运气闭眼随机挑中并唤醒点 A，把它戳上 Visited 面纱。</li>
+    <li>点 A 领命立刻按下探照灯，向着四面八方扫出一波距离 $\\le Eps$ 的邻域雷达图。</li>
+    <li>系统冰冷裁决：如果点 A 雷达图里的猎物总数不幸落后于 $MinPts$ 指标，系统直接当头盖下 <strong>Noise (噪声垃圾)</strong> 的印章扔一边（注意这只是暂时的冷宫，说不定后面它走狗屎运会被其他巨佬核心扫中变成边界护城河被捞出来）。</li>
+    <li>但如果大喜！点 A 扫出的人马浩荡庞大 <strong>$\\ge MinPts$</strong>，那这股燎原之火就正式烧起来了。点 A 被册封 <strong>Core Point (神圣核心点)</strong>。系统为了它专门隆重奠基拔地而起一座崭新的大本营营寨——命名为全新的大簇 $C$！然后理所应当地，点 A 和它刚才扫到的所有眼皮子底下的直接邻居小弟全被扯着塞进了营寨 $C$。</li>
+    <li>可怕的病毒级传销扩张 <strong>Density-reachable (密度可达传播网)</strong> 开启！<br>刚刚被点 A 拉进伙的邻居如果依然是 Unvisited，也被强制开启探照灯继续找新邻居。只要这些个下家邻居自己争气，探照出来的人头居然也能突破 $MinPts$，那么下家也能被追封为次级核心！下家新招揽来的一串人马直接跟着大哥一起连滚带爬地统统拉入到当初的大本营 $C$ 里去！<br>
+    这一套像击鼓传花一样不断通过 <strong>密度相连 (Density-connectedness)</strong> 传导出去的网络，最后会将整个地图上连绵不绝互相勾搭拉拢的成千上万个核心基站全拼在一起，再加上那些没出息只够挂着当边境墙的边界点小弟，就化合成了一个犹如毒液般千姿百态、外人根本无法用圆规画出来的巨大畸形独家异种簇群！</li>
+    <li>当这把连绵大火烧断了气彻底扑腾不出去后，系统才换一口气，回头去剩下全服还在沉睡的无尽 Unvisited 人群里重现挑一个幸运儿唤醒当下一个点，机械循环回步骤1。直到天下地图上不再有 Unvisited 者，系统光辉下发“Game Over”。</li>
 </ol>
+
 <h2>3. 变密度的痛点与 OPTICS 的降维打击</h2>
 <p><strong>DBSCAN 的死穴</strong>：它对 Eps 和 MinPts 两个参数的依赖达到了病态的程度。<br>
 想象一个场景：城市中心的高端住宅区密集无比，而郊区的平房区相对稀疏。如果设定极小的 Eps，城市中心完美分群，但郊区的居民将全被判定为孤立噪声点；如果设定极大的 Eps，郊区居民成功建簇，但整个城市中心的多个截然不同的小区会被极度宽泛的阈值直接溶解成一个大黑洞。<br>
@@ -478,6 +512,7 @@ m10 = """
 <p>基于这个序列，OPTICS 绘制出著名的 <strong>Reachability Plot (可达性图)</strong>。<br>
 在这个二维柱状图中，所有点连绵起伏。那些数值很低、深陷下去的 <strong>“山谷 (Valleys)”</strong>，就代表了距离极短、相互拥挤的密集人口簇；而那些突兀的高峰，就是稀疏区域或噪点。<br>
 <strong>最强大的地方在于</strong>：即便是城市中心的超深谷（超密集簇）和郊区的浅谷（一般密集簇），人类或后续切分算法可以直接根据图表上的波谷轮廓将它们分别切分出来，完全不再需要去纠结那个进退两难的全局固定边界 Eps！</p>
+
 <h3>🎯 Mock Exam 经典例题</h3>
 <p><strong>【Q1. 判定填空题】</strong>在执行 DBSCAN 聚类中，设定 $Eps=1.5$, $MinPts=4$。此时侦测到点 A 的 1.5 邻域内恰好只装进了 2 个点（自己和点 B）。同时，点 B 是一个名副其实的超级地王（其圈内有 10 个人），那么请问点 A 此时该挂上 <strong>____</strong> 的牌子，而点 B 将被尊称为 <strong>____</strong>？</p>
 <p><strong>【解答】</strong>: 填入 <code>Border point (边界点)</code> 和 <code>Core point (核心点)</code>。<br>
@@ -522,9 +557,10 @@ m11 = """
 <ul>
     <li><strong>B-Cubed precision and recall (基于元素的评价)</strong>：<br>
     不再从宏观混淆矩阵去看，而是微观到每两个个体的绑定关系。对于任何一个具体的样本，观察它所在的聚类小圈子，看看圈内有多少人 <strong>真实类别也确实与它一致</strong>，这就是它在这个簇里的 Precision；再看看总体中跟它同样真实类别的人，有多少被 <strong>成功招揽进了这个同样的簇里</strong>，这是 Recall。将全员加权平均得出。</li>
-    <li><strong>Classes to clusters evaluation (WEKA 的对标黑魔法)</strong>：<br>
-    面对算法吐出的一堆名为 Cluster 0, Cluster 1, Cluster 2 的蒙面群落，由于不知道它们究竟对应原先的 猫、狗 还是 猪 类。WEKA 会在后台启动贪婪的 <strong>排列组合匹配</strong>，强行寻找一条能让算法的簇标签与真实的类别标签重合度最高、匹配样本人数最为庞大的映射对位链路。<br>
-    一旦完成对位映射，“聚类错配”就会被无缝转化为类似于监督学习那样的 <strong>分类错误率 (Classification error rate)</strong>，从而直接宣告该无监督算法在此数据集上的生杀大权。</li>
+    <li><strong>Classes to clusters evaluation (WEKA 映射对位黑魔法执行流)</strong>：<br>
+    面对无监督算法吐出的一堆没有任何含义的数字名字如 Cluster 0, Cluster 1, Cluster 2 蒙面群落，你由于不知道它们究竟对应原先实际的猫、狗还是猪的类标，你在 WEKA 里强制运行这套魔法。<br>
+    WEKA 此时会在底层引擎中暗中强行驱动 <strong>贪婪排列组合大阵 (Hungarian or Greedy Matching)</strong>，硬是在一堆杂乱盲开出来的聚类编号盘子里，千方百计地拨弄配对！直到它终于找准了一条唯一能让真实大类样本和机器瞎编出来的群落标签对齐人数最多、重叠度最庞大的完美金线。<br>
+    一旦这层翻译加密映射被破解，一切豁然开朗。剩下那些不管怎么画圈都塞不进去映射格子的离群异端们，自然就被系统等效转化为了传统监督战场的那些打靶失败的 <strong>错分炮灰 (Classification Error Rate)</strong>，从而在一套原本不讲武德的聚类引擎里强硬计算出了惊世骇俗的最直观精度报错比例。</li>
 </ul>
 <h3>🎯 Mock Exam 经典例题</h3>
 <p><strong>【Q1. 极限推理与计算题】</strong>在一个聚类任务中，提取出了某个特定数据点 $x$ 的距离数据：它到本簇兄弟同伴们的平均距离是 5，它到距离它最近的那个隔壁备胎大簇里的敌人们的平均距离竟然只有区区 1 ！请套用 Silhouette Coefficient 轮廓系数公式计算此样本点的悲惨指数，并判定该点是不是被算法彻底分错坑位了。</p>
@@ -596,14 +632,16 @@ m13 = """
 <p>在面对成百上千的高维稀疏表格时，组合的 <em>Full Data Cube</em> 节点将以 $2^N$ 的指数海啸级膨胀爆炸。<br>
 但幸运的是，在大数据的商业现实中，那些切分得过细、总计数 $Count \\le 1$ 的零星随机偶然搭配网格点，根本不具备挖掘长线统计规律的价值。<br>
 <strong>Iceberg Cube (冰山立方体)</strong> 因此横空出世：强制引入一层硬性闸门——<strong>Iceberg condition (冰山阈值限制，通常为 Min_Support / 最小出现频次数)</strong>。如同浩瀚的数据海洋，系统只被允许去计算、汇总和留存那些高频发生、足以浮出水面之上的极少部分高价值网格阵列集，其余海平面下的稀碎偶然杂音直接被抛弃不计算，从而极其恐怖地削减计算时空开销。</p>
-<h2>3. BUC 算法 (Bottom-Up Construction)：基于单调性的降维灭杀</h2>
-<p>这是一个名字具有极大欺骗性的神级算法。虽然叫 Bottom-Up，但在递归树与分割流向上，它是 <strong>从 Lattice 顶端唯一的、包含全宇宙数据的 Apex 节点 (0-D，全局一统) 向下启动</strong>，并逐步通过切入一层又一层的新维度变量来进行 <strong>切块细分 (Partition)</strong> 的。</p>
-<p><strong>BUC 极其残暴的剪枝 (Prune) 灵魂之源</strong>：<br>
-BUC 的运算极度依赖和 Apriori 算法一脉相承的 <strong>单调性原理 (Monotonicity)</strong>。<br>
-思考一下切分的现实意义：一个全集总节点的 <code>Count</code> 数量必然大于等于它细分后的任何一个特定子集分支的数量（广东省的人数绝对大于等于深圳市的人数）。<br>
-因此在自顶向下分裂的递归中，一旦探测到：<br>
-<strong>当前这个维度的中间节点的 Count / Sum 值已经微弱到跌破了冰山阈值 (Iceberg Threshold)，那么不用再挣扎细看了，它下面再细分产生的所有子子孙孙后代网格节点，其数量绝对不可能反弹回光返照大于这个阈值！</strong><br>
-算法立刻手起刀落，在这里执行 <strong>整枝阻断剪除 (Prune)</strong>，整个分支子树的所有剩余层级维度组合将直接被连根跳过、全部免去算力！这使得 BUC 成为处理超高维稀疏数据集的当之无愧的绝对王者。</p>
+
+<h2>3. 冰山上的裁决利刃：BUC 数据立方体心决执行流</h2>
+<p>这是一个名字具有极大欺骗性的神级操作体系。虽然名冠有 Bottom-Up 的外衣，但当你剖开其深层的递归神经图与降维流向走势，它毫无疑问是 <strong>从那高悬天际、代表着独裁全宇宙总汇总口径的最顶端神谕 Apex 节点 (0-D，全局一统) 直接发号施令，劈空斩下</strong>，一步一血印地向下方基层维度空间发动 <strong>降维细化 (Partition)</strong> 的狂暴清剿。</p>
+<p><strong>BUC 极其残暴且致命的早停剪枝 (Prune) 绝杀奥义</strong>：<br>
+整个 BUC 引擎架构之所有能够在多维组合大爆炸的绝境中傲视群雄，全拜它骨子里死死咬住了那条跟 Apriori 先验法则心法如出一辙的 <strong>单调不可逆降级铁律 (Monotonicity)</strong>。<br>
+闭上眼睛冥想那个无可动摇的物理事实边界：任何一个父辈全集巨无霸节点的总人头 <code>Count</code> 储量，必然是呈现出无死角泰山压顶的碾压之势，它绝不可能被其下辖进一步切割衍生出的那些细碎散乱的小格子分号给逆反超越（比如广东省的总编制人口上限卡死在那儿，下面区区一个深圳市无论怎么折腾，它圈到的人都休想大得过广东全局）。<br>
+既然如此，在每一次那惊心动魄的自顶向下劈落递归流中，系统只消稍稍探一下鼻息：<br>
+<strong>如果就在当前这个正被刀斧加身的半中腰过渡维度的统计口径格子内，它身上攒到的那点可怜巴巴的 Count / Sum 数据血量指标，已经提前拉跨、干瘪微弱到可耻地跌破了最高长官预设的冰山生存最低配额警戒底线 (Iceberg Threshold)——大局已定！它绝不用再去傻乎乎地劳心费神深入翻找了。因为基于那个伟大的单调性禁制结界，它底下以后再怎么继续碎尸万段深挖降维切割产生的所有徒子徒孙末裔格子的继承人，它们分到的可怜遗产绝对不可能起死回生逆向反弹暴涨突破回那个硬性指标生死线上！</strong><br>
+伴随这个铁一般的判断斩出，算法引擎根本不带一丝一毫的留恋犹豫，直接就在这里宣判死刑，雷厉风行地拉下那重若千钧的 <strong>连坐整枝隔断大闸 (Prune)</strong>！从这一环向下牵扯出来的整条分支血脉、全部那成千上万原本该去老实排队轮询苦算的无边海量层级维度组合，都在这瞬间的当头棒喝下被毫不留情地连根一脚全盘踹走、被这道神圣裁决尽数挡在算法算力的结算黑名单之外！这种对计算资源的极度血腥碾压和恐怖精简豁免机制，当仁不让地将 BUC 加冕为了应对现代那些令人绝望的超高维极度稀疏恐怖废墟数据集的、不容任何质疑的唯一霸主王座。</p>
+
 <h2>4. CCIC (Closed Cube and Iceberg Cube) 的极致闭环压缩</h2>
 <p>单靠冰山截断还不够狠。如果在切分时遇到极其密集的关联属性群，就会诞生一种无语的景象：从“某款特殊游戏机”下钻到了“购买该游戏机的特定骨灰级玩家群体”，发现两者的汇总统计值（Count/Sum）一模一样，毫无流失。<br>
 这意味着增加进来的这个所谓新切割维度对这批特定数据完全就是多余的陪衬废话，它根本没有起到实质的再细化切割作用！<br>
@@ -681,75 +719,38 @@ m14 = """
 m15 = """
 <h1>MODULE 15: WEKA常见算法与伪代码深度推演</h1>
 <p style="font-size: 14px; color: var(--muted); border-left: 4px solid var(--border); padding-left: 12px; margin-top: -16px; margin-bottom: 32px;">📄 <strong>参考讲义：</strong><code>综合提取自全部幻灯片</code></p>
-<div class="highlight"><strong>专题说明：</strong>针对可能出现的算法“执行步骤排序题”与 WEKA 算法填空题进行针对性梳理。所有算法均采用 WEKA 官方实现命名。</div>
-<h2>1. 决策树建树流 (C4.5 / J48) & REPTree</h2>
-<p><strong>J48 核心流排序 (Divide-and-Conquer):</strong></p>
-<ol>
-    <li>如果当前节点内所有样本 <strong>同属于一个类别</strong>，直接设为叶子节点。</li>
-    <li>如果已经 <strong>没有属性可分</strong> 或者样本数少于 <code>minNumObj</code> 参数，按多数表决设为叶节点。</li>
-    <li>遍历所有属性，计算 <strong>Gain Ratio</strong> （避免了单纯 Information Gain 的多值偏向）。</li>
-    <li>挑选带来 <strong>最大纯度提升 (Best Split)</strong> 的属性作为节点。</li>
-    <li>根据取值拆分为互不相交的 <strong>子集 (Subsets)</strong>，<strong>递归 (Recursively)</strong> 调用构建子树。</li>
-    <li>整树建完后，激活 <strong>后剪枝 (Post-pruning)</strong>，利用 <code>confidenceFactor</code> 计算折叠误差进行修剪。</li>
-</ol>
-<p><strong>对比 REPTree:</strong> 核心在于它的剪枝极其简单粗暴——强制切出一块 <strong>Holdout (验证集)</strong>，使用 <strong>Reduced Error Pruning (降低错误率剪枝)</strong>，只要子树在验证集上犯错比变成一个单叶子节点还多，立刻砍掉。</p>
-<h2>2. 规则分类器 (JRip / PART / ZeroR)</h2>
-<p><strong>ZeroR:</strong> 世界上最废物的算法，不看任何特征，直接输出样本集里最多的类，作为一切算法表现的最低底线。</p>
-<p><strong>Sequential Covering (JRip 核心流):</strong></p>
-<ol>
-    <li>初始化空的规则集。</li>
-    <li><strong>[Learn-One-Rule]</strong> 运用 FOIL 增益寻找一条 <strong>最佳</strong> 规则。如果在扩展条件时，模型变得过于累赘导致超过了 <strong>MDL (最小描述长度 64 bits)</strong> 限制，立马停止增加前件。</li>
-    <li>将绝佳规则加入规则集。</li>
-    <li><strong>[Remove-Covered]</strong> 从训练集中，将被规则正确覆盖的实例 <strong>物理删除 (Separate and Conquer)</strong>。</li>
-    <li>只要还有数据，跳回步骤2继续学。</li>
-    <li>最后进行 <strong>全局规则优化与替换 (Global Optimization)</strong>。</li>
-</ol>
-<p><strong>对比 PART:</strong> 它在 <strong>Learn-One-Rule</strong> 的时候，不像 JRip 慢慢拼规则，而是直接在当下的数据上用 C4.5 建一棵局部的“部分决策树”，挑覆盖最广的叶子做成规则，然后立马把树扔了。极其纯粹但极其耗时。</p>
-<h2>3. 懒惰学习器 (IBk / KNN)</h2>
-<p><strong>算法特点:</strong></p>
-<ol>
-    <li><strong>训练阶段 (Training):</strong> $O(1)$ 时间复杂度。什么都不做，仅仅把数据写入内存。</li>
-    <li><strong>测试阶段 (Testing):</strong> 对新来的实例，计算其与库中每一个点的 <strong>欧氏距离</strong>（必须预先过 <code>Normalize</code> 滤镜）。</li>
-    <li>根据 <code>distanceWeighting</code> 参数（如 Inverse Distance）分配权重。</li>
-    <li>进行 <strong>多数加权投票</strong>。</li>
-</ol>
-<h2>4. 频繁项集迭代闭环 (Apriori)</h2>
-<p><strong>核心流排序:</strong></p>
-<ol>
-    <li>扫描数据库，找出现次数 $\\ge Min\\_Sup$ 的单件，得到 <strong>$L_1$</strong>。</li>
-    <li><strong>[Join Step]</strong> 让上一轮的 $L_{k-1}$ 自己跟自己配对，拼出下一维度的 <strong>候选集 $C_k$</strong>。</li>
-    <li><strong>[Prune Step - 极其关键]</strong> 对于 $C_k$ 中的每个候选项，强行检查它的所有 $(k-1)$ 维子集。如果 <strong>发现任何一个子集</strong> 不在 $L_{k-1}$ 中，利用反单调性定律，立刻将该候选从 $C_k$ <strong>粉碎删除</strong>。</li>
-    <li>再扫一次真实数据库，数一数幸存的 $C_k$ 的真实露脸次数，达标的正式晋升为 <strong>$L_k$</strong>。</li>
-    <li>循环直到找不到新的项集。</li>
-</ol>
-<h2>5. 聚类双雄 (SimpleKMeans vs DBSCAN)</h2>
-<p><strong>SimpleKMeans (划分流):</strong></p>
-<ol>
-    <li><strong>随机空投</strong> $K$ 个点作为 Centroids。</li>
-    <li><strong>[Assignment]</strong> 遍历所有人，计算距离，收归距离最近的质心麾下。</li>
-    <li><strong>[Update]</strong> 重算各个阵营内部的坐标平均值 $\\mu_i$，移动质心到该坐标。</li>
-    <li>循环直到 SSE 极小，无人叛变跳槽。</li>
-</ol>
-<p><strong>DBSCAN (密度流):</strong></p>
-<ol>
-    <li>标记所有点 <strong>Unvisited</strong>。随机挑一个标记 Visited。</li>
-    <li>打开雷达，扫出距离 $\\le Eps$ 的邻居。</li>
-    <li>如果邻居 $\\ge MinPts$，该点封神为 <strong>Core Point (核心点)</strong>。建新簇 $C$。</li>
-    <li>通过 <strong>Density-reachable (密度可达)</strong> 顺藤摸瓜，遍历它所有邻居，如果邻居也是核心点，就把邻居的邻居全拉进 $C$。拔出萝卜带出泥。</li>
-    <li>如果邻居 $< MinPts$，打上 <strong>Noise (噪声)</strong> 标签无情抛弃。</li>
-</ol>
-<h2>6. BUC 数据立方体裁决流</h2>
-<p><strong>核心流排序:</strong></p>
-<ol>
-    <li>直接从 Lattice 顶端的 <strong>Apex (0-D，全局一统)</strong> 启动算法。</li>
-    <li>对当前维度集合进行 <strong>Partition (切分细化)</strong>。</li>
-    <li><strong>[Iceberg Pruning 极速阻断]</strong>：核对当前切割出的节点的 Count / Sum 值。一旦发现它 <strong>$\\le Min\\_Support$ (跌破冰山阈值)</strong>。</li>
-    <li>运用 <strong>单调性原理</strong>（子集的数量绝对不可能逆势反弹），直接砍断该节点下的所有降维子树，彻底免算！</li>
-    <li>对满足条件的节点，继续递归下钻 (Drill-down)。</li>
-</ol>
+<div class="highlight"><strong>专题说明：</strong>针对可能出现的算法“执行步骤排序题”与 WEKA 算法填空题进行针对性梳理。所有算法均已采用 WEKA 官方实现命名并内置融合到各个前序基础知识模块内部中去（即您在浏览诸如 M03, M04, M08 等独立知识图鉴时，其相关的 WEKA 工具具体执行流与拦截代码便会赫然展现）。此处汇聚做一集中快速索引。</div>
+<h2>1. 分类兵器库大观 (Classification Flows)</h2>
+<p>本课程重火力压制的决策高塔与判决铁链：</p>
+<ul>
+    <li><strong>决策树 J48 (C4.5) 引擎：</strong> 凭借 Gain Ratio 规避多值诱惑，在叶节点纯净度不足或样本微缩时强行收手。事毕引爆 <code>confidenceFactor</code> 开启暴戾的后方大清算剪枝。详情点击参考 <strong>[M03 模块]</strong>。</li>
+    <li><strong>决策树 REPTree 后方防御：</strong> 最简陋的建树流程，配以最精明的分裂自保——直接祭出 Holdout 验证集，启动 Reduced Error Pruning 机制，发现验证集上犯错稍高，立刻截断，护身保命第一。详情点击参考 <strong>[M03 模块]</strong>。</li>
+    <li><strong>纯血规则集 JRip 引擎 (RIPPER)：</strong> 永远采用 Separate-and-Conquer （摘一叶杀一人的分离并征服大法）抽出高精专防规则。其底牌为祭出 64bits 的 MDL 死亡惩罚线拦腰叫停疯狂的规则生长线。详情点击参考 <strong>[M05 模块]</strong>。</li>
+    <li><strong>屠杀成树法则 PART：</strong> 最血腥的提取机器，直接现场建起一颗巨大的 C4.5 大树，蛮力剥下最为粗壮、笼盖面极广的那一条金叶规则。得手后立刻翻脸无情，摧毁抛弃全树。详情点击参考 <strong>[M05 模块]</strong>。</li>
+    <li><strong>零帧起手式 ZeroR：</strong> 数据界的最低门槛废铁标尺，毫无预测可言，直接无脑盲猜所有样本里人头数最庞大的多数派（Majority Class），作为检验高级魔法有无翻车的绝对下限防御墙。详情点击参考 <strong>[M02 与 M05 模块]</strong>。</li>
+    <li><strong>近邻巡航法 IBk (KNN)：</strong> 极其纯粹的空间扫描探测算法，无脑吃掉内存存下所有点。测试集一来，立刻拉平量纲（Min-Max/Z-score），打开欧氏尺暴力扫描。并且内置 <code>distanceWeighting</code> 的距离偏袒加权绝技，把投票权极端倒向贴身心腹，瞬间瓦解外围异类噪点干扰。详情点击参考 <strong>[M04 模块]</strong>。</li>
+    <li><strong>极寒方差收割机 Random Forest：</strong> Bagging 流派的最高造诣结晶。除了拉上成千上万多胞胎分身去狂抽大投票外，更强行挖除了建树节点的全盘上帝视野，把特征选择权完全禁锢在一个可怜的窄口切片框里 ($K = \\log_2M+1$) 逼着系统畸变生长，最后换来了这堪称奇迹般无比多样的集成抗压性。详情点击参考 <strong>[M06 模块]</strong>。</li>
+    <li><strong>孤注一掷逆风盘 AdaBoost：</strong> Boosting 流派的极限接力救援体系。永远强迫后人全盘承接过往兄弟失败造就的重压烂摊子——那批被不断滚雪球般暴力提高难度权重的高频错分死结题。逼出强人后，根据在训练时的胜率分配独裁发言权，完成逆转乾坤的一波强效非线性拟合。详情点击参考 <strong>[M06 模块]</strong>。</li>
+</ul>
+
+<h2>2. 无监督混沌聚类法 (Unsupervised Clustering Flows)</h2>
+<p>在缺乏上帝真实标签的黑暗地带，算法自我救赎的法则：</p>
+<ul>
+    <li><strong>质心强权引力法 SimpleKMeans：</strong> 开场随机盲投引爆极高风险。后利用空间大挪移，一刻不停地执行 Assignment(收拢小弟) 和 Update(移交新质心位置) 两步交接曲舞。直到整体混沌差值 $SSE$ 的波谷见底、小弟队伍的军心不再动摇，算法强制宣告停摆固化。详情点击参考 <strong>[M09 模块]</strong>。</li>
+    <li><strong>层次滚雪球法 (Hierarchical AGNES)：</strong> 不看全局，只在浩渺中挑选一对最来电的基建结拜。利用 Single/Complete/Ward 各种连线绝活拼凑树枝，一旦绑定生生世世绝不回头反悔，连绵不断长出那巨大的分岔系统进化树大合影图。详情点击参考 <strong>[M09 模块]</strong>。</li>
+    <li><strong>反骨抗噪雷达法 DBSCAN：</strong> 从未被球形束缚的自由魂。用 $Eps$ 和 $MinPts$ 扫描划分王侯阶级（核心）、边缘炮灰（边界）与被放逐者（噪声）。借由核心传销般的密度可达网脉向四周无节制辐射勾连，直至拼合出一只极度畸形却又紧密团结的怪兽级簇群。详情点击参考 <strong>[M10 模块]</strong>。</li>
+</ul>
+
+<h2>3. 黄金屋商海淘宝战 (Frequent Patterns & Data Warehouse)</h2>
+<p>打破组合诅咒与极速查账的引擎心法：</p>
+<ul>
+    <li><strong>组合砍伐绝学 Apriori：</strong> 把组合大爆炸玩弄于股掌。通过 $L_{k-1}$ 自我联姻诞生出 $C_k$ 大批候选。紧接着祭出最引以为傲的“反单调性断头台”：子集里但凡有一个没资格当纯血贵族的，这个侯选项被立刻拉去处决。经过极其惨烈的精简屠杀后才去数据库里读盘数钱验证，完美破除高维检索时间黑洞。详情点击参考 <strong>[M08 模块]</strong>。</li>
+    <li><strong>数据立方体的绝路审判 BUC (Bottom-Up Construction)：</strong> 身披自底向上的名号，却干着自高台极速俯冲切割勾当的神技。这把快刀一旦下落探入格子，只要发现 Count 这点血量微弱到不满足冰山警戒线的极低门槛，连眼皮都不抬一下，当场宣判此脉斩绝，它底下所有本该接连被精雕细切的子子孙孙切片网格维度瞬间被强行全盘阻断剥夺算力名额，造就了多维分析运算史上最恐怖的无损削减传奇。详情点击参考 <strong>[M13 模块]</strong>。</li>
+</ul>
 """
 
 # Extract the data directly to a data.js file
+import json
 data_js_content = f"""const modulesData = {{
   m01: {json.dumps(m01)},
   m02: {json.dumps(m02)},
@@ -770,23 +771,21 @@ data_js_content = f"""const modulesData = {{
 
 with open('data.js', 'w', encoding='utf-8') as f:
     f.write(data_js_content)
-print("data.js successfully written.")
+print("data.js updated with embedded pseudo-code steps in every module.")
 
-# Now clean up index.html to source data.js instead of embedding everything!
+# Update index.html to ensure JS logic still remains perfectly decoupled
 with open('index.html', 'r', encoding='utf-8') as f:
     html_content = f.read()
 
-start_marker = "const modulesData = {"
-end_marker = "function openModule(modId) {"
-start_idx = html_content.find(start_marker)
-end_idx = html_content.find(end_marker)
+# If the <script src="data.js"> isn't present, add it. The file was fixed in previous steps but just in case.
+if "data.js" not in html_content:
+    start_marker = "const modulesData = {"
+    end_marker = "function openModule(modId) {"
+    start_idx = html_content.find(start_marker)
+    end_idx = html_content.find(end_marker)
 
-if start_idx != -1 and end_idx != -1:
-    # Inject <script src="data.js"></script> just before the main script logic
-    # The new html removes the massive block and adds the src linking
-    new_html = html_content[:start_idx] + "</script>\n<script src=\"data.js\"></script>\n<script>\n" + html_content[end_idx:]
-    with open('index.html', 'w', encoding='utf-8') as f:
-        f.write(new_html)
-    print("index.html successfully updated to use data.js architecture.")
-else:
-    print("Could not find the embedded data to replace in index.html.")
+    if start_idx != -1 and end_idx != -1:
+        new_html = html_content[:start_idx] + "</script>\n<script src=\"data.js\"></script>\n<script>\n" + html_content[end_idx:]
+        with open('index.html', 'w', encoding='utf-8') as f:
+            f.write(new_html)
+        print("index.html fixed with decouple linkage to data.js.")
