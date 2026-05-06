@@ -657,6 +657,13 @@ B：提取广州和深圳第一季度手机品类的具体销售数据报表。<
 <p><strong>【解答】</strong>:<br>
 - <strong>A 对应 Roll-up (上卷)</strong>。查询摒弃了地点与产品细分维度，并将时间沿概念层级上卷汇总至全年，展现了宏观数据。<br>
 - <strong>B 对应 Dice (切块)</strong>。该查询在三个维度上均进行了条件限定（地点限定广深，时间限定一季度，商品限定手机），属于在多维空间中提取局部子块的操作。</p>
+<p><strong>【Q2. Cuboid 数量计算题】</strong>Consider a dense 10-dimensional data cube. How many different cuboids are there? (考虑一个稠密的 10 维数据立方体。它包含多少个不同的 cuboid？)<br>
+A. 1<br>
+B. 10<br>
+C. 1024<br>
+D. None of above</p>
+<p><strong>【解答】</strong>: <strong>C. 1024</strong><br>
+包含 $N$ 个维度的数据立方体，其可能生成的所有聚合层级（Cuboids）的数量为 $2^N$。在此题中，维度 $N=10$，故不同的 cuboids 数量为 $2^{10} = 1024$。</p>
 """
 
 m13 = """
