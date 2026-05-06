@@ -42,10 +42,10 @@ m01 = """
 <h2>3. WEKA 数据预处理核心算法流程</h2>
 <p><strong>ReplaceMissingValues 过滤器执行流程:</strong></p>
 <ol>
-    <li>扫描数据集中的每一列特征属性。</li>
-    <li>如果该列为 <strong>Numeric (数值型)</strong>，计算该列所有非缺失样本的 <strong>均值 (Mean)</strong>，将所有缺失的 <code>?</code> 替换为均值。</li>
-    <li>如果该列为 <strong>Nominal (标称型)</strong>，统计该列各种分类的出现频次，找出 <strong>众数 (Mode)</strong>，将所有缺失的 <code>?</code> 替换为众数。</li>
-    <li>如果数据集包含类别标签 (Class Label)，该过滤器可选择是否针对每个类别的内部独立计算均值/众数，从而提高填补的精确度。</li>
+    <li><strong>[扫描特征]</strong>：扫描数据集中的每一列特征属性。</li>
+    <li><strong>[处理数值型]</strong>：如果该列为 <strong>Numeric (数值型)</strong>，计算该列所有非缺失样本的 <strong>均值 (Mean)</strong>，将所有缺失的 <code>?</code> 替换为均值。</li>
+    <li><strong>[处理标称型]</strong>：如果该列为 <strong>Nominal (标称型)</strong>，统计该列各种分类的出现频次，找出 <strong>众数 (Mode)</strong>，将所有缺失的 <code>?</code> 替换为众数。</li>
+    <li><strong>[利用类标签优化]</strong>：如果数据集包含类别标签 (Class Label)，该过滤器可选择是否针对每个类别的内部独立计算均值/众数，从而提高填补的精确度。</li>
 </ol>
 
 <h2>4. 距离与相似度度量详解</h2>
@@ -97,17 +97,17 @@ F1-score 仅在 Precision 和 Recall 均较高时才会取得高值。</p>
 <h2>4. WEKA 中的基础判别与阈值算法流</h2>
 <p><strong>ZeroR 算法执行流程 (基准分类器):</strong></p>
 <ol>
-    <li>忽略所有特征变量，仅统计目标类别 (Class Label) 的分布。</li>
-    <li>建立模型：强制预测为样本中数量最多的类别（多数类）。</li>
-    <li>测试阶段：对于任何新样本，均预测为多数类。常用于作为模型性能下限基准。</li>
+    <li><strong>[扫描全库]</strong>：忽略所有特征变量，仅统计目标类别 (Class Label) 的分布。</li>
+    <li><strong>[建立模型]</strong>：强制预测为样本中数量最多的类别（多数类）。</li>
+    <li><strong>[测试阶段]</strong>：对于任何新样本，均预测为多数类。常用于作为模型性能下限基准。</li>
 </ol>
 <p><strong>阈值移动与曲线绘制流程 (ROC/PRC 绘制原理):</strong></p>
 <ol>
-    <li>模型为每个测试样本输出其属于正类的 <strong>概率得分 (Probabilities)</strong>。</li>
-    <li>将所有样本按照概率得分从高到低排序。</li>
-    <li>初始时，将判定阈值设为无穷大，所有样本被预测为负例（TP=0, FP=0）。</li>
-    <li>逐步降低阈值，每次将一个新样本判定为正例。如果其真实标签为正，则 TPR (Recall) 增加；如果为负，则 FPR 增加。</li>
-    <li>当阈值降至0时，所有样本均被判定为正例，形成从 (0,0) 到 (1,1) 的评估曲线。</li>
+    <li><strong>[输出概率]</strong>：模型为每个测试样本输出其属于正类的 <strong>概率得分 (Probabilities)</strong>。</li>
+    <li><strong>[排序]</strong>：将所有样本按照概率得分从高到低排序。</li>
+    <li><strong>[初始阈值]</strong>：初始时，将判定阈值设为无穷大，所有样本被预测为负例（TP=0, FP=0）。</li>
+    <li><strong>[降低阈值]</strong>：逐步降低阈值，每次将一个新样本判定为正例。如果其真实标签为正，则 TPR (Recall) 增加；如果为负，则 FPR 增加。</li>
+    <li><strong>[绘制曲线]</strong>：当阈值降至0时，所有样本均被判定为正例，形成从 (0,0) 到 (1,1) 的评估曲线。</li>
 </ol>
 
 <h2>5. ROC 曲线与 PRC 曲线对比</h2>
@@ -157,29 +157,29 @@ m03 = """
 <h2>3. WEKA 决策树算法：J48, REPTree 与 RandomTree 流程</h2>
 <p><strong>J48 算法 (对应 C4.5) 核心建树流程:</strong></p>
 <ol>
-    <li>若当前节点内所有样本 <strong>属于同一类别</strong>，则设为叶子节点。</li>
-    <li>若 <strong>无剩余属性可供划分</strong> 或样本数少于 <code>minNumObj</code> 下限，按多数表决法设为叶子节点。</li>
-    <li>计算所有候选属性的 <strong>Gain Ratio (增益率)</strong>。</li>
-    <li>选择带来 <strong>最大纯度提升 (Best Split)</strong> 的属性作为分裂节点。</li>
-    <li>根据该属性将数据集划分为 <strong>子集 (Subsets)</strong>，对每个子集 <strong>递归</strong> 调用步骤1到4。</li>
-    <li>树构建完成后，执行 <strong>后剪枝 (Post-pruning)</strong>。利用参数 <code>confidenceFactor</code> 评估剪枝前后的误差成本，进行修剪以防过拟合。</li>
+    <li><strong>[同类判定]</strong>：若当前节点内所有样本 <strong>属于同一类别</strong>，则设为叶子节点。</li>
+    <li><strong>[结束判定]</strong>：若 <strong>无剩余属性可供划分</strong> 或样本数少于 <code>minNumObj</code> 下限，按多数表决法设为叶子节点。</li>
+    <li><strong>[计算增益]</strong>：计算所有候选属性的 <strong>Gain Ratio (增益率)</strong>。</li>
+    <li><strong>[选择属性]</strong>：选择带来 <strong>最大纯度提升 (Best Split)</strong> 的属性作为分裂节点。</li>
+    <li><strong>[递归划分]</strong>：根据该属性将数据集划分为 <strong>子集 (Subsets)</strong>，对每个子集 <strong>递归</strong> 调用步骤1到4。</li>
+    <li><strong>[后剪枝]</strong>：树构建完成后，执行 <strong>后剪枝 (Post-pruning)</strong>。利用参数 <code>confidenceFactor</code> 评估剪枝前后的误差成本，进行修剪以防过拟合。</li>
 </ol>
 
 <p><strong>REPTree (Reduced Error Pruning Tree) 算法核心流程:</strong></p>
 <ol>
-    <li>将数据集划分为 <strong>训练集</strong> 和 <strong>独立验证集 (Holdout set)</strong>。</li>
-    <li>使用训练集，基于 Information Gain 或方差快速构建决策树。</li>
-    <li>自底向上利用 <strong>独立验证集</strong> 评估各分支的泛化能力。</li>
-    <li>若某分支节点在验证集上的误差高于将其替换为单一叶节点的误差，则执行 <strong>剪枝 (Reduced Error Pruning)</strong>。</li>
+    <li><strong>[数据划分]</strong>：将数据集划分为 <strong>训练集</strong> 和 <strong>独立验证集 (Holdout set)</strong>。</li>
+    <li><strong>[快速建树]</strong>：使用训练集，基于 Information Gain 或方差快速构建决策树。</li>
+    <li><strong>[泛化评估]</strong>：自底向上利用 <strong>独立验证集</strong> 评估各分支的泛化能力。</li>
+    <li><strong>[实施剪枝]</strong>：若某分支节点在验证集上的误差高于将其替换为单一叶节点的误差，则执行 <strong>剪枝 (Reduced Error Pruning)</strong>。</li>
 </ol>
 
 <p><strong>RandomTree 算法核心流程:</strong></p>
 <ol>
-    <li>在计算分裂节点时，不考虑所有可用特征。</li>
-    <li>从所有 $M$ 个特征中，<strong>随机抽取 $K$ 个特征组成子集</strong>（通常 $K=\\log_2M+1$）。</li>
-    <li>仅在这 $K$ 个特征中选择最优特征进行分裂。</li>
-    <li>建树过程 <strong>不执行剪枝 (No pruning)</strong>，允许树充分生长。</li>
-    <li>由于单棵树方差较大，通常将其作为 RandomForest (随机森林) 的基础分类器，通过集成平滑误差。</li>
+    <li><strong>[屏蔽全量特征]</strong>：在计算分裂节点时，不考虑所有可用特征。</li>
+    <li><strong>[随机抽样特征]</strong>：从所有 $M$ 个特征中，<strong>随机抽取 $K$ 个特征组成子集</strong>（通常 $K=\\log_2M+1$）。</li>
+    <li><strong>[特征选择]</strong>：仅在这 $K$ 个特征中选择最优特征进行分裂。</li>
+    <li><strong>[完全生长]</strong>：建树过程 <strong>不执行剪枝 (No pruning)</strong>，允许树充分生长。</li>
+    <li><strong>[集成准备]</strong>：由于单棵树方差较大，通常将其作为 RandomForest (随机森林) 的基础分类器，通过集成平滑误差。</li>
 </ol>
 
 <h3>🎯 经典例题</h3>
@@ -218,11 +218,11 @@ m04 = """
 <h2>5. WEKA 中的 KNN 算法实现：IBk</h2>
 <p>在 WEKA 中，KNN 的对应算法为 <strong>IBk</strong> (Instance-Based learning)。其工作流程如下：</p>
 <ol>
-    <li><strong>Training 阶段：</strong>将带有标签的训练数据保存至数据结构（如 <code>LinearNNSearch</code> 或 <code>KDTree</code>）中，不建立任何概率模型。</li>
-    <li><strong>Testing 阶段：</strong>对于新实例 $X$，IBk 可根据设置对其属性进行归一化，使其与历史数据的刻度一致。</li>
-    <li>在空间中计算 $X$ 与内存中所有点的几何距离。</li>
-    <li>选出距离 $X$ 最近的 $K$ 个历史邻居。</li>
-    <li><strong>Weighting 权重裁决：</strong>若不加权，则前 $K$ 个邻居进行等权重投票；若启用 <strong>Inverse Distance (距离倒数加权)</strong>，则根据 $w_i = \\frac{1}{d(x, x_i)}$ 赋予距离更近的邻居更高的投票权重，以降低远处噪点的影响。最终由得票最高者决定 $X$ 的类别。</li>
+    <li><strong>[Training 阶段]</strong>：将带有标签的训练数据保存至数据结构（如 <code>LinearNNSearch</code> 或 <code>KDTree</code>）中，不建立任何概率模型。</li>
+    <li><strong>[属性归一化]</strong>：进入 <strong>Testing 阶段</strong>，对于新实例 $X$，IBk 可根据设置对其属性进行归一化，使其与历史数据的刻度一致。</li>
+    <li><strong>[计算距离]</strong>：在空间中计算 $X$ 与内存中所有点的几何距离。</li>
+    <li><strong>[选取邻居]</strong>：选出距离 $X$ 最近的 $K$ 个历史邻居。</li>
+    <li><strong>[权重裁决]</strong>：若不加权，则前 $K$ 个邻居进行等权重投票；若启用 <strong>Inverse Distance (距离倒数加权)</strong>，则根据 $w_i = \\frac{1}{d(x, x_i)}$ 赋予距离更近的邻居更高的投票权重，以降低远处噪点的影响。最终由得票最高者决定 $X$ 的类别。</li>
 </ol>
 
 <h3>🎯 经典例题</h3>
@@ -255,20 +255,20 @@ m05 = """
 <p>规则分类算法多采用 <strong>Separate-and-Conquer (分离并征服 / Sequential Covering)</strong> 策略。</p>
 <p><strong>JRip (RIPPER) 的增量学习流:</strong></p>
 <ol>
-    <li>创建空白的规则集。</li>
-    <li><strong>[Learn-One-Rule]</strong> 在当前剩余样本上，利用 <strong>FOIL 信息增益</strong> 逐步添加 <code>AND</code> 条件，生成覆盖某一类别最优的单条规则。</li>
-    <li><strong>[MDL Stopping]</strong>：在生成规则时，算法会通过 <strong>最小描述长度 (MDL)</strong> 监控模型复杂度。若新规则增加的准确率不足以弥补其造成的模型膨胀（通常设定为 64 bits 的惩罚线），则停止该规则的生长。</li>
-    <li><strong>[Remove-Covered]</strong>：从训练集中将该规则覆盖的所有样本删除。</li>
-    <li>重复步骤2，针对剩余样本继续生成规则，直至满足终止条件。</li>
-    <li>进入 <strong>Global Optimization (全局修剪)</strong> 阶段，优化生成的决策列表。</li>
+    <li><strong>[初始化规则集]</strong>：创建空白的规则集。</li>
+    <li><strong>[学习单条规则]</strong>：在当前剩余样本上，利用 <strong>FOIL 信息增益</strong> 逐步添加 <code>AND</code> 条件，生成覆盖某一类别最优的单条规则。</li>
+    <li><strong>[MDL 停止准则]</strong>：在生成规则时，算法会通过 <strong>最小描述长度 (MDL)</strong> 监控模型复杂度。若新规则增加的准确率不足以弥补其造成的模型膨胀（通常设定为 64 bits 的惩罚线），则停止该规则的生长。</li>
+    <li><strong>[移除已覆盖样本]</strong>：从训练集中将该规则覆盖的所有样本删除。</li>
+    <li><strong>[循环迭代]</strong>：重复步骤2，针对剩余样本继续生成规则，直至满足终止条件。</li>
+    <li><strong>[全局修剪]</strong>：进入 <strong>Global Optimization (全局修剪)</strong> 阶段，优化生成的决策列表。</li>
 </ol>
 
 <p><strong>PART 算法流程:</strong></p>
 <ol>
-    <li>在当前全量数据上调用 C4.5 (J48) 构建 <strong>局部决策树 (Partial Decision Tree)</strong>。</li>
-    <li>选取该树中覆盖样本最多、纯度最高的一条叶节点路径，将其转化为 <code>IF...THEN...</code> 规则。</li>
-    <li><strong>放弃并销毁这棵决策树 (Discard the tree)</strong>。</li>
-    <li>将提取到的规则覆盖的样本从数据集中删除。回到步骤1重复该过程，直到覆盖所有样本。该方法能提取高纯度规则，但计算开销较大。</li>
+    <li><strong>[构建局部决策树]</strong>：在当前全量数据上调用 C4.5 (J48) 构建 <strong>局部决策树 (Partial Decision Tree)</strong>。</li>
+    <li><strong>[提取规则]</strong>：选取该树中覆盖样本最多、纯度最高的一条叶节点路径，将其转化为 <code>IF...THEN...</code> 规则。</li>
+    <li><strong>[销毁决策树]</strong>：放弃并销毁这棵决策树 (Discard the tree)。</li>
+    <li><strong>[移除并循环]</strong>：将提取到的规则覆盖的样本从数据集中删除。回到步骤1重复该过程，直到覆盖所有样本。该方法能提取高纯度规则，但计算开销较大。</li>
 </ol>
 
 <h3>🎯 经典例题</h3>
@@ -289,35 +289,35 @@ m06 = """
 <h2>2. 常见集成算法执行流</h2>
 <p><strong>Bagging (Bootstrap Aggregation 装袋法)：降低方差 (Reduce Variance)</strong></p>
 <ol>
-    <li>对包含 $N$ 条样本的原始数据集，并行启动 $M$ 个训练过程。</li>
-    <li><strong>[Bootstrap 抽样]</strong>：每个过程通过 <strong>有放回抽样</strong> $N$ 次构建子数据集（约有 36.8% 的样本未被抽中，称为 OOB 数据）。</li>
-    <li>各个过程独立训练一个不受限的高复杂度基分类器（如深层决策树）。</li>
+    <li><strong>[并行启动]</strong>：对包含 $N$ 条样本的原始数据集，并行启动 $M$ 个训练过程。</li>
+    <li><strong>[抽样组集]</strong>：每个过程通过 <strong>有放回抽样</strong> $N$ 次构建子数据集（约有 36.8% 的样本未被抽中，称为 OOB 数据）。</li>
+    <li><strong>[独立训练]</strong>：各个过程独立训练一个不受限的高复杂度基分类器（如深层决策树）。</li>
     <li><strong>[多数投票]</strong>：测试时，所有基分类器对新样本进行预测，分类任务采用 <strong>多数投票 (Majority Voting)</strong>，回归任务取平均。平均效应能够抵消单个分类器的随机误差，大幅降低方差。</li>
 </ol>
 
 <p><strong>Random Forest (随机森林)：提升特征多样性</strong></p>
 <ol>
-    <li>继承 Bagging 的 Bootstrap 抽样机制。</li>
-    <li>在构建每棵决策树的每一个分裂节点时，算法 <strong>不评估所有特征</strong>。</li>
-    <li>而是随机抽取一个包含 $K$ 个特征的子集（通常 $K=\\log_2M+1$）。</li>
-    <li>决策树仅能在该随机子集中选择最优特征进行分裂。这种特征层面的随机化进一步降低了树与树之间的相关性，提升了集成的 <strong>多样性 (Diversity)</strong>，使得平滑方差的效果更佳。</li>
+    <li><strong>[继承抽样]</strong>：继承 Bagging 的 Bootstrap 抽样机制。</li>
+    <li><strong>[屏蔽全量特征]</strong>：在构建每棵决策树的每一个分裂节点时，算法 <strong>不评估所有特征</strong>。</li>
+    <li><strong>[随机特征子集]</strong>：而是随机抽取一个包含 $K$ 个特征的子集（通常 $K=\\log_2M+1$）。</li>
+    <li><strong>[特征选择]</strong>：决策树仅能在该随机子集中选择最优特征进行分裂。这种特征层面的随机化进一步降低了树与树之间的相关性，提升了集成的 <strong>多样性 (Diversity)</strong>，使得平滑方差的效果更佳。</li>
 </ol>
 
 <p><strong>AdaBoost (Adaptive Boosting)：降低偏差 (Reduce Bias)</strong></p>
 <ol>
-    <li>采用串行方式，训练一系列弱分类器（如单层决策树 Decision Stump）。初始时，所有样本被赋予相等的权重。</li>
-    <li>第一棵基分类器进行训练后，必然会错误分类一部分难例样本。</li>
+    <li><strong>[初始化权重]</strong>：采用串行方式，训练一系列弱分类器（如单层决策树 Decision Stump）。初始时，所有样本被赋予相等的权重。</li>
+    <li><strong>[基分类器训练]</strong>：第一棵基分类器进行训练后，必然会错误分类一部分难例样本。</li>
     <li><strong>[权重更新]</strong>：系统将这些被错误分类的样本的 <strong>权重提升 (Increase weight)</strong>，并降低分类正确样本的权重。</li>
-    <li>后续的分类器被迫专注于拟合上一轮具有较高权重的错分样本。此过程迭代进行，逐步修正前期模型的偏差。</li>
+    <li><strong>[串行修正]</strong>：后续的分类器被迫专注于拟合上一轮具有较高权重的错分样本。此过程迭代进行，逐步修正前期模型的偏差。</li>
     <li><strong>[加权投票]</strong>：测试时，所有分类器参与投票。系统根据各分类器在训练阶段的 <strong>错误率</strong> 为其分配权重 ($\\alpha_m = \\frac{1}{2} \\ln \\left(\\frac{1-\\epsilon}{\\epsilon}\\right)$)，错误率越低的分类器拥有越大的决策话语权。</li>
 </ol>
 
 <p><strong>Stacking (堆叠法):</strong></p>
 <ol>
-    <li>在基础层使用多种不同类型的基分类器（例如决策树、KNN、朴素贝叶斯）。</li>
-    <li>将测试样本输入这些基分类器，得到各自的预测结果。</li>
-    <li><strong>将这些预测结果组合成全新的特征向量</strong>。</li>
-    <li>将新特征向量输入更高阶的 <strong>元分类器 (Meta Classifier)</strong>，由其学习如何结合这些底层预测，得出最终结论。</li>
+    <li><strong>[基础层预测]</strong>：在基础层使用多种不同类型的基分类器（例如决策树、KNN、朴素贝叶斯）。</li>
+    <li><strong>[获取结果]</strong>：将测试样本输入这些基分类器，得到各自的预测结果。</li>
+    <li><strong>[特征重组]</strong>：将这些预测结果组合成全新的特征向量。</li>
+    <li><strong>[元分类器融合]</strong>：将新特征向量输入更高阶的 <strong>元分类器 (Meta Classifier)</strong>，由其学习如何结合这些底层预测，得出最终结论。</li>
 </ol>
 
 <h3>🎯 经典例题</h3>
@@ -346,19 +346,19 @@ m07 = """
 <p>为了客观评估模型泛化能力，需使用独立的测试数据。WEKA 提供了多种验证流程：</p>
 <p><strong>Cross-Validation (交叉验证 / K-Fold CV):</strong></p>
 <ol>
-    <li>例如 10-Fold CV，将原始数据集划分为 <strong>10 个互不重叠的等离子集 (Folds)</strong>。</li>
-    <li>通常采用 <strong>Stratification (分层机制)</strong>：确保每个划分块中的类别比例与原数据集一致，避免样本分布极度失衡。</li>
-    <li>进行 10 轮迭代训练。每轮选取第 $i$ 个块作为测试集 (Test Set)，其余 9 个块合并作为训练集。</li>
-    <li>10轮结束后，计算这 10 次测试结果的平均值，以获得稳定可靠的性能评估。</li>
+    <li><strong>[数据划分]</strong>：例如 10-Fold CV，将原始数据集划分为 <strong>10 个互不重叠的等离子集 (Folds)</strong>。</li>
+    <li><strong>[分层机制]</strong>：通常采用 <strong>Stratification (分层机制)</strong>：确保每个划分块中的类别比例与原数据集一致，避免样本分布极度失衡。</li>
+    <li><strong>[迭代训练]</strong>：进行 10 轮迭代训练。每轮选取第 $i$ 个块作为测试集 (Test Set)，其余 9 个块合并作为训练集。</li>
+    <li><strong>[评估计算]</strong>：10轮结束后，计算这 10 次测试结果的平均值，以获得稳定可靠的性能评估。</li>
 </ol>
 
 <p><strong>63.2 Bootstrap 评估引擎:</strong></p>
 <ol>
-    <li>在数据集较小不适合进行交叉验证时，可使用 Bootstrap 方法。</li>
-    <li>采用 <strong>有放回随机抽样 (Sampling with replacement)</strong>，抽取与原数据集规模 $N$ 相同次数的样本构成训练集。</li>
-    <li><strong>数学推导</strong>：在一次有放回抽样中，特定样本未被抽中的概率为 $\\left(1 - \\frac{1}{N}\\right)$。在 $N$ 次抽样中始终未被抽中的概率为 $\\left(1 - \\frac{1}{N}\\right)^N$。当 $N \\to \\infty$ 时，该概率趋近于 $\\frac{1}{e} \\approx 0.368$。</li>
-    <li>这意味着训练集中由于重复抽样，实际只包含约 <strong>63.2% 的独特原始样本</strong>。</li>
-    <li>剩下的约 <strong>36.8% 未被抽中的样本构成 Out-of-Bag (OOB) 集合</strong>，将其作为无偏的测试集用于评估模型性能。</li>
+    <li><strong>[适用场景]</strong>：在数据集较小不适合进行交叉验证时，可使用 Bootstrap 方法。</li>
+    <li><strong>[有放回抽样]</strong>：采用 <strong>有放回随机抽样 (Sampling with replacement)</strong>，抽取与原数据集规模 $N$ 相同次数的样本构成训练集。</li>
+    <li><strong>[概率推导]</strong>：在一次有放回抽样中，特定样本未被抽中的概率为 $\\left(1 - \\frac{1}{N}\\right)$。在 $N$ 次抽样中始终未被抽中的概率为 $\\left(1 - \\frac{1}{N}\\right)^N$。当 $N \\to \\infty$ 时，该概率趋近于 $\\frac{1}{e} \\approx 0.368$。</li>
+    <li><strong>[训练集构成]</strong>：这意味着训练集中由于重复抽样，实际只包含约 <strong>63.2% 的独特原始样本</strong>。</li>
+    <li><strong>[OOB 测试集]</strong>：剩下的约 <strong>36.8% 未被抽中的样本构成 Out-of-Bag (OOB) 集合</strong>，将其作为无偏的测试集用于评估模型性能。</li>
 </ol>
 <h3>🎯 经典例题</h3>
 <p><strong>【Q1. 计算推演题】</strong>某研究机构收集了 100 份罕见病样本。为避免传统 Holdout 方法导致测试集过小，决定采用 63.2% Bootstrap 策略。请问需执行多少次“有放回抽样”以组建训练集？生成的训练集中预期包含多少条不重复的独特样本？未被抽中的样本有何用途？</p>
@@ -387,10 +387,10 @@ m08 = """
 <p>Apriori 算法通过逐层迭代发掘频繁项集：</p>
 <ol>
     <li><strong>[扫描数据库]</strong>：统计所有单一商品的频率，剔除不满足 <code>Min_Support</code> 的项，生成 <strong>频繁 1-项集 ($L_1$)</strong>。</li>
-    <li><strong>[候选生成 (Join)]</strong>：通过上一代的频繁集 $L_{k-1}$ 相互拼接，生成高一维度的 <strong>候选集 $C_k$</strong>。</li>
-    <li><strong>[剪枝策略 (Prune)]</strong>：检查 $C_k$ 中每个候选集的所有 $(k-1)$ 级子集，如果发现有子集不在 $L_{k-1}$ 中，根据反单调性，立刻将该候选集从 $C_k$ 中删除。</li>
+    <li><strong>[候选生成]</strong>：通过上一代的频繁集 $L_{k-1}$ 相互拼接，生成高一维度的 <strong>候选集 $C_k$</strong>。</li>
+    <li><strong>[剪枝策略]</strong>：检查 $C_k$ 中每个候选集的所有 $(k-1)$ 级子集，如果发现有子集不在 $L_{k-1}$ 中，根据反单调性，立刻将该候选集从 $C_k$ 中删除。</li>
     <li><strong>[支持度验证]</strong>：对剪枝后剩余的 $C_k$ 候选项，再次扫描数据库计算实际支持度，满足阈值的项集成为 <strong>$L_k$</strong>。</li>
-    <li>重复步骤 2 至 4，直到无法生成新的频繁项集。</li>
+    <li><strong>[循环迭代]</strong>：重复步骤 2 至 4，直到无法生成新的频繁项集。</li>
 </ol>
 
 <h2>4. 项集的存储与压缩技术 (Maximal & Closed)</h2>
@@ -426,10 +426,10 @@ m09 = """
 <h2>2. 划分聚类方法：K-Means (SimpleKMeans)</h2>
 <p>K-Means 是最典型的中心点划分算法，其迭代步骤如下：</p>
 <ol>
-    <li>随机选择 $K$ 个数据点作为初始簇质心 (Centroids)。</li>
+    <li><strong>[初始化质心]</strong>：随机选择 $K$ 个数据点作为初始簇质心 (Centroids)。</li>
     <li><strong>[样本分配]</strong>：计算每个数据点到各质心的欧氏距离，将数据点分配至距离最近的质心所在的簇 $C_i$。</li>
     <li><strong>[质心更新]</strong>：计算每个簇内所有样本坐标的 <strong>几何平均值 (均值, $\\mu_i$)</strong>，将质心更新为该均值点位置。</li>
-    <li>上述分配与更新步骤循环进行，直至质心位置不再变化，或整体误差平方和 <strong>(SSE) 达到收敛</strong>，算法停止。</li>
+    <li><strong>[收敛停止]</strong>：上述分配与更新步骤循环进行，直至质心位置不再变化，或整体误差平方和 <strong>(SSE) 达到收敛</strong>，算法停止。</li>
 </ol>
 
 <h3>K-Means 的主要局限性：</h3>
@@ -483,12 +483,12 @@ m10 = """
 </ul>
 <h3>DBSCAN 的簇扩展流程：</h3>
 <ol>
-    <li>初始化所有数据点为未访问状态 (Unvisited)。</li>
-    <li>随机选取一个未访问点 $A$，标记为已访问。并获取其 Eps 邻域。</li>
-    <li>若邻域样本数 $< MinPts$，将 $A$ 标记为 <strong>Noise</strong>（后续可能被重置为边界点）。</li>
-    <li>若邻域样本数 $\\ge MinPts$，$A$ 成为核心点，创建一个新簇 $C$。将邻域内的点加入 $C$ 的考察队列。</li>
-    <li><strong>密度可达扩展 (Density-reachable)</strong>：遍历考察队列中的点，若其邻域同样满足核心点条件，则将其邻域内的点也吸纳进队列，通过 <strong>密度相连 (Density-connectedness)</strong> 效应不断扩张簇的规模。</li>
-    <li>簇扩展停止后，重复选择未访问的点，直至所有点均被评估完毕。</li>
+    <li><strong>[初始化状态]</strong>：初始化所有数据点为未访问状态 (Unvisited)。</li>
+    <li><strong>[选取起始点]</strong>：随机选取一个未访问点 $A$，标记为已访问。并获取其 Eps 邻域。</li>
+    <li><strong>[判定噪声]</strong>：若邻域样本数 $< MinPts$，将 $A$ 标记为 <strong>Noise</strong>（后续可能被重置为边界点）。</li>
+    <li><strong>[构建新簇]</strong>：若邻域样本数 $\\ge MinPts$，$A$ 成为核心点，创建一个新簇 $C$。将邻域内的点加入 $C$ 的考察队列。</li>
+    <li><strong>[密度可达扩展]</strong>：遍历考察队列中的点，若其邻域同样满足核心点条件，则将其邻域内的点也吸纳进队列，通过 <strong>密度相连 (Density-connectedness)</strong> 效应不断扩张簇的规模。</li>
+    <li><strong>[循环迭代]</strong>：簇扩展停止后，重复选择未访问的点，直至所有点均被评估完毕。</li>
 </ol>
 
 <h2>3. 变密度数据的局限与 OPTICS 算法</h2>
