@@ -41,6 +41,8 @@ m01 = """
 
 <h2>3. WEKA 数据预处理核心算法流程</h2>
 <p><strong>ReplaceMissingValues 过滤器执行流程:</strong></p>
+<p><strong>输入：</strong>包含缺失值的数据集。<br>
+<strong>输出：</strong>填补了缺失值的完整数据集。</p>
 <ol>
     <li><strong>[扫描特征]</strong>：扫描数据集中的每一列特征属性。</li>
     <li><strong>[处理数值型]</strong>：如果该列为 <strong>Numeric (数值型)</strong>，计算该列所有非缺失样本的 <strong>均值 (Mean)</strong>，将所有缺失的 <code>?</code> 替换为均值。</li>
@@ -96,12 +98,16 @@ F1-score 仅在 Precision 和 Recall 均较高时才会取得高值。</p>
 
 <h2>4. WEKA 中的基础判别与阈值算法流</h2>
 <p><strong>ZeroR 算法执行流程 (基准分类器):</strong></p>
+<p><strong>输入：</strong>带有目标类别标签的训练数据集；测试样本。<br>
+<strong>输出：</strong>对所有测试样本的多数类预测结果。</p>
 <ol>
     <li><strong>[扫描全库]</strong>：忽略所有特征变量，仅统计目标类别 (Class Label) 的分布。</li>
     <li><strong>[建立模型]</strong>：强制预测为样本中数量最多的类别（多数类）。</li>
     <li><strong>[测试阶段]</strong>：对于任何新样本，均预测为多数类。常用于作为模型性能下限基准。</li>
 </ol>
 <p><strong>阈值移动与曲线绘制流程 (ROC/PRC 绘制原理):</strong></p>
+<p><strong>输入：</strong>测试样本及其真实类标；模型输出的正类概率得分。<br>
+<strong>输出：</strong>ROC 曲线或 PRC 曲线。</p>
 <ol>
     <li><strong>[输出概率]</strong>：模型为每个测试样本输出其属于正类的 <strong>概率得分 (Probabilities)</strong>。</li>
     <li><strong>[排序]</strong>：将所有样本按照概率得分从高到低排序。</li>
@@ -156,6 +162,8 @@ m03 = """
 
 <h2>3. WEKA 决策树算法：J48, REPTree 与 RandomTree 流程</h2>
 <p><strong>J48 算法 (对应 C4.5) 核心建树流程:</strong></p>
+<p><strong>输入：</strong>包含特征属性与类标的训练数据集。<br>
+<strong>输出：</strong>一棵修剪过的决策树模型。</p>
 <ol>
     <li><strong>[同类判定]</strong>：若当前节点内所有样本 <strong>属于同一类别</strong>，则设为叶子节点。</li>
     <li><strong>[结束判定]</strong>：若 <strong>无剩余属性可供划分</strong> 或样本数少于 <code>minNumObj</code> 下限，按多数表决法设为叶子节点。</li>
@@ -166,6 +174,8 @@ m03 = """
 </ol>
 
 <p><strong>REPTree (Reduced Error Pruning Tree) 算法核心流程:</strong></p>
+<p><strong>输入：</strong>带有特征与类标的原始数据集。<br>
+<strong>输出：</strong>一棵经过 Reduced Error Pruning 优化的决策树。</p>
 <ol>
     <li><strong>[数据划分]</strong>：将数据集划分为 <strong>训练集</strong> 和 <strong>独立验证集 (Holdout set)</strong>。</li>
     <li><strong>[快速建树]</strong>：使用训练集，基于 Information Gain 或方差快速构建决策树。</li>
@@ -174,6 +184,8 @@ m03 = """
 </ol>
 
 <p><strong>RandomTree 算法核心流程:</strong></p>
+<p><strong>输入：</strong>训练数据集；特征子集大小 $K$。<br>
+<strong>输出：</strong>一棵未剪枝的随机特征决策树。</p>
 <ol>
     <li><strong>[屏蔽全量特征]</strong>：在计算分裂节点时，不考虑所有可用特征。</li>
     <li><strong>[随机抽样特征]</strong>：从所有 $M$ 个特征中，<strong>随机抽取 $K$ 个特征组成子集</strong>（通常 $K=\\log_2M+1$）。</li>
@@ -217,6 +229,8 @@ m04 = """
 
 <h2>5. WEKA 中的 KNN 算法实现：IBk</h2>
 <p>在 WEKA 中，KNN 的对应算法为 <strong>IBk</strong> (Instance-Based learning)。其工作流程如下：</p>
+<p><strong>输入：</strong>带有类标的训练数据集；新测试实例 $X$；邻居数量 $K$。<br>
+<strong>输出：</strong>新实例 $X$ 的预测类别。</p>
 <ol>
     <li><strong>[Training 阶段]</strong>：将带有标签的训练数据保存至数据结构（如 <code>LinearNNSearch</code> 或 <code>KDTree</code>）中，不建立任何概率模型。</li>
     <li><strong>[属性归一化]</strong>：进入 <strong>Testing 阶段</strong>，对于新实例 $X$，IBk 可根据设置对其属性进行归一化，使其与历史数据的刻度一致。</li>
@@ -254,6 +268,8 @@ m05 = """
 <h2>3. WEKA 规则引擎：JRip 与 PART 核心算法流</h2>
 <p>规则分类算法多采用 <strong>Separate-and-Conquer (分离并征服 / Sequential Covering)</strong> 策略。</p>
 <p><strong>JRip (RIPPER) 的增量学习流:</strong></p>
+<p><strong>输入：</strong>带有特征与类标的训练数据集。<br>
+<strong>输出：</strong>有序的 IF-THEN 规则列表 (Decision List)。</p>
 <ol>
     <li><strong>[初始化规则集]</strong>：创建空白的规则集。</li>
     <li><strong>[学习单条规则]</strong>：在当前剩余样本上，利用 <strong>FOIL 信息增益</strong> 逐步添加 <code>AND</code> 条件，生成覆盖某一类别最优的单条规则。</li>
@@ -264,6 +280,8 @@ m05 = """
 </ol>
 
 <p><strong>PART 算法流程:</strong></p>
+<p><strong>输入：</strong>带有特征与类标的训练数据集。<br>
+<strong>输出：</strong>独立的 IF-THEN 规则集合。</p>
 <ol>
     <li><strong>[构建局部决策树]</strong>：在当前全量数据上调用 C4.5 (J48) 构建 <strong>局部决策树 (Partial Decision Tree)</strong>。</li>
     <li><strong>[提取规则]</strong>：选取该树中覆盖样本最多、纯度最高的一条叶节点路径，将其转化为 <code>IF...THEN...</code> 规则。</li>
@@ -288,6 +306,8 @@ m06 = """
 
 <h2>2. 常见集成算法执行流</h2>
 <p><strong>Bagging (Bootstrap Aggregation 装袋法)：降低方差 (Reduce Variance)</strong></p>
+<p><strong>输入：</strong>原始数据集；基分类器数量 $M$。<br>
+<strong>输出：</strong>集成后的强分类器预测结果。</p>
 <ol>
     <li><strong>[并行启动]</strong>：对包含 $N$ 条样本的原始数据集，并行启动 $M$ 个训练过程。</li>
     <li><strong>[抽样组集]</strong>：每个过程通过 <strong>有放回抽样</strong> $N$ 次构建子数据集（约有 36.8% 的样本未被抽中，称为 OOB 数据）。</li>
@@ -296,6 +316,8 @@ m06 = """
 </ol>
 
 <p><strong>Random Forest (随机森林)：提升特征多样性</strong></p>
+<p><strong>输入：</strong>原始数据集；决策树数量 $M$；特征子集大小 $K$。<br>
+<strong>输出：</strong>随机森林集成模型。</p>
 <ol>
     <li><strong>[继承抽样]</strong>：继承 Bagging 的 Bootstrap 抽样机制。</li>
     <li><strong>[屏蔽全量特征]</strong>：在构建每棵决策树的每一个分裂节点时，算法 <strong>不评估所有特征</strong>。</li>
@@ -304,6 +326,8 @@ m06 = """
 </ol>
 
 <p><strong>AdaBoost (Adaptive Boosting)：降低偏差 (Reduce Bias)</strong></p>
+<p><strong>输入：</strong>原始数据集；弱分类器数量 $M$。<br>
+<strong>输出：</strong>加权投票的强分类器模型。</p>
 <ol>
     <li><strong>[初始化权重]</strong>：采用串行方式，训练一系列弱分类器（如单层决策树 Decision Stump）。初始时，所有样本被赋予相等的权重。</li>
     <li><strong>[基分类器训练]</strong>：第一棵基分类器进行训练后，必然会错误分类一部分难例样本。</li>
@@ -313,6 +337,8 @@ m06 = """
 </ol>
 
 <p><strong>Stacking (堆叠法):</strong></p>
+<p><strong>输入：</strong>训练数据集；多种不同类型的初级基分类器；高阶元分类器。<br>
+<strong>输出：</strong>Stacking 集成模型。</p>
 <ol>
     <li><strong>[基础层预测]</strong>：在基础层使用多种不同类型的基分类器（例如决策树、KNN、朴素贝叶斯）。</li>
     <li><strong>[获取结果]</strong>：将测试样本输入这些基分类器，得到各自的预测结果。</li>
@@ -345,6 +371,8 @@ m07 = """
 <h2>3. 模型验证方法与数据分割</h2>
 <p>为了客观评估模型泛化能力，需使用独立的测试数据。WEKA 提供了多种验证流程：</p>
 <p><strong>Cross-Validation (交叉验证 / K-Fold CV):</strong></p>
+<p><strong>输入：</strong>原始数据集；划分折数 $K$ (如 10)。<br>
+<strong>输出：</strong>模型平均性能评估指标。</p>
 <ol>
     <li><strong>[数据划分]</strong>：例如 10-Fold CV，将原始数据集划分为 <strong>10 个互不重叠的等离子集 (Folds)</strong>。</li>
     <li><strong>[分层机制]</strong>：通常采用 <strong>Stratification (分层机制)</strong>：确保每个划分块中的类别比例与原数据集一致，避免样本分布极度失衡。</li>
@@ -353,6 +381,8 @@ m07 = """
 </ol>
 
 <p><strong>63.2 Bootstrap 评估引擎:</strong></p>
+<p><strong>输入：</strong>原始数据集 (规模为 $N$)。<br>
+<strong>输出：</strong>基于 OOB 测试集的模型性能评估指标。</p>
 <ol>
     <li><strong>[适用场景]</strong>：在数据集较小不适合进行交叉验证时，可使用 Bootstrap 方法。</li>
     <li><strong>[有放回抽样]</strong>：采用 <strong>有放回随机抽样 (Sampling with replacement)</strong>，抽取与原数据集规模 $N$ 相同次数的样本构成训练集。</li>
@@ -385,6 +415,8 @@ m08 = """
 
 <h2>3. Apriori 算法流程</h2>
 <p>Apriori 算法通过逐层迭代发掘频繁项集：</p>
+<p><strong>输入：</strong>交易记录数据库；最小支持度阈值 <code>Min_Support</code>。<br>
+<strong>输出：</strong>所有满足支持度阈值的频繁项集。</p>
 <ol>
     <li><strong>[扫描数据库]</strong>：统计所有单一商品的频率，剔除不满足 <code>Min_Support</code> 的项，生成 <strong>频繁 1-项集 ($L_1$)</strong>。</li>
     <li><strong>[候选生成]</strong>：通过上一代的频繁集 $L_{k-1}$ 相互拼接，生成高一维度的 <strong>候选集 $C_k$</strong>。</li>
@@ -425,6 +457,8 @@ m09 = """
 
 <h2>2. 划分聚类方法：K-Means (SimpleKMeans)</h2>
 <p>K-Means 是最典型的中心点划分算法，其迭代步骤如下：</p>
+<p><strong>输入：</strong>数据集；目标簇数量 $K$。<br>
+<strong>输出：</strong>划分为 $K$ 个簇的数据点集合及各簇质心。</p>
 <ol>
     <li><strong>[初始化质心]</strong>：随机选择 $K$ 个数据点作为初始簇质心 (Centroids)。</li>
     <li><strong>[样本分配]</strong>：计算每个数据点到各质心的欧氏距离，将数据点分配至距离最近的质心所在的簇 $C_i$。</li>
@@ -482,6 +516,8 @@ m10 = """
     <li><strong>Noise (噪声点)</strong>：既非核心点也不是边界点，无法归入任何簇的样本。这一机制赋予了 DBSCAN 优良的抗噪性。</li>
 </ul>
 <h3>DBSCAN 的簇扩展流程：</h3>
+<p><strong>输入：</strong>数据集；邻域半径 $Eps$；最小样本数 $MinPts$。<br>
+<strong>输出：</strong>基于密度的聚类簇及噪声点集合。</p>
 <ol>
     <li><strong>[初始化状态]</strong>：初始化所有数据点为未访问状态 (Unvisited)。</li>
     <li><strong>[选取起始点]</strong>：随机选取一个未访问点 $A$，标记为已访问。并获取其 Eps 邻域。</li>
