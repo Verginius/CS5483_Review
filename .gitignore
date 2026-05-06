@@ -17,6 +17,14 @@ MTR_Stress_Flow_Simulation.zip
 CS5483_Team-Project_MTR-Stress-Flow-Simulation/
 MTR_Stress_Flow_Simulation/
 
+# Course materials and helper scripts
+Lectures/
+check_pdfs.py
+cs5483_midterm_mock_exam.pdf
+cs5483_mock_exam.pdf
+extract_texts.py
+ocr_pdfs.py
+
 # Sensitive data
 ssh key/
 
