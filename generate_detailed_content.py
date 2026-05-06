@@ -289,10 +289,25 @@ m05 = """
     <li><strong>[移除并循环]</strong>：将提取到的规则覆盖的样本从数据集中删除。回到步骤1重复该过程，直到覆盖所有样本。该方法能提取高纯度规则，但计算开销较大。</li>
 </ol>
 
+<h2>4. 规则生长的评估：FOIL 信息增益 (FOIL Information Gain)</h2>
+<p>在 Sequential Covering 算法 (如 RIPPER) 逐步增加条件以生长规则时，如何评估新加入的条件是否优秀？算法采用 <strong>FOIL 信息增益</strong> 来衡量规则纯度的提升：</p>
+<p><strong>计算公式：</strong> $FOIL\\_IG = p_1 \\times \\left( \\log_2 \\frac{p_1}{p_1 + n_1} - \\log_2 \\frac{p_0}{p_0 + n_0} \\right)$</p>
+<ul>
+    <li>$p_0, n_0$：原规则 $R_0$ 覆盖的正例与负例数量。</li>
+    <li>$p_1, n_1$：加入新条件后的新规则 $R_1$ 覆盖的正例与负例数量。</li>
+    <li><strong>公式本质</strong>：新规则覆盖的正例数 $\\times$ (新规则的对数纯度 - 原规则的对数纯度)。它不仅要求新规则纯度高，还要求新规则能覆盖足够多的正样本。</li>
+</ul>
+
 <h3>🎯 经典例题</h3>
-<p><strong>【Q1. 算法执行流程考点】</strong>请阐述 JRip（WEKA中的 RIPPER 算法）依赖什么底层停止机制来防止规则集过拟合？</p>
+<p><strong>【Q1. FOIL 信息增益计算题】</strong>已知某规则 $R_0$ 覆盖了 40 个正例和 10 个负例。在 $R_0$ 基础上增加一个新条件形成规则 $R_1$，$R_1$ 覆盖了 30 个正例和 0 个负例。请写出该次生长的 FOIL 信息增益计算公式。</p>
+<p><strong>【解答】</strong>:<br>
+- 原规则 $R_0$ 覆盖情况：$p_0 = 40, n_0 = 10$<br>
+- 新规则 $R_1$ 覆盖情况：$p_1 = 30, n_1 = 0$<br>
+- <strong>FOIL_IG</strong> = $30 \\times \\left( \\log_2 \\frac{30}{30+0} - \\log_2 \\frac{40}{40+10} \\right) = 30 \\times (\\log_2 1.0 - \\log_2 0.8) = -30 \\log_2 0.8$</p>
+
+<p><strong>【Q2. 算法执行流程考点】</strong>请阐述 JRip（WEKA中的 RIPPER 算法）依赖什么底层停止机制来防止规则集过拟合？</p>
 <p><strong>【解答】</strong>: JRip 依靠 <strong>MDL (Minimum Description Length, 最小描述长度)</strong> 原则作为停止准则。在逐步增加新规则或扩充规则前件时，算法会评估模型的描述长度。如果新规则带来的纯度提升不能抵消其造成的模型长度增加惩罚，系统会停止规则生长，以此控制模型复杂度并保证泛化能力。</p>
-<p><strong>【Q2. 概念对比】</strong>PART 和 JRip 在生成“单条最优规则”时的策略有何本质区别？</p>
+<p><strong>【Q3. 概念对比】</strong>PART 和 JRip 在生成“单条最优规则”时的策略有何本质区别？</p>
 <p><strong>【解答】</strong>: JRip 采用增量生长策略，每次基于 FOIL 信息增益选择最优特征拼接 <code>AND</code> 条件；而 PART 的策略更为系统，它利用未被覆盖的样本构建一棵“局部决策树”，从树中提取出最优秀的一条路径作为规则，随后废弃该树。PART 通过局部建树确保了规则的高准确性，但计算成本明显高于 JRip。</p>
 """
 
@@ -733,6 +748,11 @@ m14 = """
     <li><strong>OPTICS Core-distance:</strong> 满足 $\\ge MinPts$ 邻居所需的最短半径</li>
     <li><strong>OPTICS Reachability-distance:</strong> $\\max(Core\\_distance(o), d(p, o))$</li>
     <li><strong>Silhouette Coefficient (轮廓系数):</strong> $s(i) = \\frac{b(i) - a(i)}{\\max(a(i), b(i))}$</li>
+</ul>
+<h2>8. 规则覆盖与 FOIL 信息增益</h2>
+<ul>
+    <li><strong>FOIL Information Gain:</strong> $FOIL\\_IG = p_1 \\times \\left( \\log_2 \\frac{p_1}{p_1 + n_1} - \\log_2 \\frac{p_0}{p_0 + n_0} \\right)$<br>
+    （其中 $p_0, n_0$ 为原规则覆盖的正负例数，$p_1, n_1$ 为增加新条件后新规则覆盖的正负例数）</li>
 </ul>
 """
 
