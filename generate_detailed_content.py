@@ -135,6 +135,15 @@ m03 = """
     <li><strong>Post-pruning (后剪枝)</strong>：树长到最大规模后，自底向上评估。如果将子树折叠为单一叶节点所带来的误差惩罚（在验证集上）小于模型复杂度惩罚，则进行裁剪。经典方法如 CART 的代价复杂度剪枝。后剪枝效果更好，但计算极其昂贵。</li>
 </ul>
 <h2>4. WEKA 中常用的树模型对比 (J48 vs REPTree vs RandomTree)</h2>
+<p><strong>J48 (C4.5) 核心建树执行步骤:</strong></p>
+<ol>
+    <li>如果当前节点内所有样本 <strong>同属于一个类别</strong>，直接设为叶子节点。</li>
+    <li>如果已经 <strong>没有属性可分</strong> 或者样本数少于 <code>minNumObj</code> 参数，按多数表决设为叶节点。</li>
+    <li>遍历所有属性，计算 <strong>Gain Ratio</strong> （避免了单纯 Information Gain 的多值偏向）。</li>
+    <li>挑选带来 <strong>最大纯度提升 (Best Split)</strong> 的属性作为节点。</li>
+    <li>根据取值拆分为互不相交的 <strong>子集 (Subsets)</strong>，<strong>递归 (Recursively)</strong> 调用构建子树。</li>
+    <li>整树建完后，激活 <strong>后剪枝 (Post-pruning)</strong>，利用 <code>confidenceFactor</code> 计算折叠误差进行修剪。</li>
+</ol>
 <table border="1" style="width:100%; border-collapse: collapse; margin-bottom: 20px;">
     <tr><th>WEKA 算法</th><th>原算法对应</th><th>核心特性与参数</th><th>适用场景与优缺点</th></tr>
     <tr>
@@ -191,6 +200,13 @@ m04 = """
 </ul>
 <h2>5. WEKA 中的 KNN 实现：IBk (Instance-Based learning with k)</h2>
 <p>在 WEKA 中，KNN 对应的算法是 <strong>IBk</strong> (位于 <code>lazy</code> 分类下)。</p>
+<p><strong>IBk 算法核心执行步骤:</strong></p>
+<ol>
+    <li><strong>训练阶段 (Training):</strong> $O(1)$ 时间复杂度。什么都不做，仅仅把数据写入内存。</li>
+    <li><strong>测试阶段 (Testing):</strong> 对新来的实例，计算其与库中每一个点的 <strong>欧氏距离</strong>（必须预先过 <code>Normalize</code> 滤镜）。</li>
+    <li>根据 <code>distanceWeighting</code> 参数（如 Inverse Distance）分配权重。</li>
+    <li>挑选距离最近的 $K$ 个邻居，进行 <strong>多数加权投票</strong>。</li>
+</ol>
 <ul>
     <li><strong>核心参数 <code>k</code></strong>：设定近邻数，默认通常是 1。可以使用 Cross-validation 自动选择最佳的 $K$（通过设置 <code>crossValidate</code> 为 True）。</li>
     <li><strong>参数 <code>distanceWeighting</code></strong>：默认是对前 $K$ 个邻居一视同仁。但如果设置距离倒数加权 (Inverse Distance)，那么虽然选了 5 个邻居，但距离你越近的那个邻居拥有越大的投票权：$w_i = \\frac{1}{d(x, x_i)}$。这能够极大削弱孤立噪点带来的负面干扰。</li>
