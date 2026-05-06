@@ -5,20 +5,15 @@ m01 = """
 <h1>MODULE 01: 概述与数据预处理</h1>
 <div class="highlight"><strong>核心考点：</strong>KDD流程全貌、数据特征的具体类型、缺失值与冗余特征处理、距离与相似度度量深度分析。</div>
 <h2>1. 什么是数据挖掘与知识发现 (KDD)?</h2>
-<p>数据挖掘 (Data Mining) 通常是知识发现 (Knowledge Discovery in Databases, KDD) 过程中最为核心的一环。KDD 是一套从庞大、不完整、有噪声的实际数据中提取隐含的、未知的且具有潜在价值知识的系统工程。其完整生命周期包含：</p>
+<p>数据挖掘 (Data Mining) 是知识发现 (Knowledge Discovery in Databases, KDD) 过程中最为核心的一环。严格按照课件定义，完整的 KDD 包含以下 7 个标准步骤：</p>
 <ol>
-    <li><strong>Data Preparation (业务理解与准备阶段)</strong>：设定目标，理解应用领域。</li>
-    <li><strong>Data Pre-processing (数据预处理)</strong>（耗时占整个工程的 70% 以上）：
-        <ul>
-            <li><strong>Data Cleaning (清洗)</strong>：处理噪声 (Noise) 和缺失值 (Missing Values)。在 WEKA 中，常用 <code>ReplaceMissingValues</code> 过滤器，连续变量用均值/中位数填补，分类变量用众数填补。</li>
-            <li><strong>Data Integration (集成)</strong>：处理多数据源的模式匹配、冗余属性识别（可使用相关性分析检测冗余）。</li>
-            <li><strong>Data Transformation (转换)</strong>：例如规范化 (Normalization) 和离散化 (Discretization, 使得连续特征变为分类区间)。</li>
-            <li><strong>Data Reduction (归约)</strong>：如主成分分析 (PCA) 或特征选择 (Attribute Selection)，减少维数灾难。</li>
-        </ul>
-    </li>
-    <li><strong>Data Mining (数据挖掘)</strong>：运用分类、聚类、频繁项集等算法提取模式。</li>
-    <li><strong>Pattern Evaluation (模式评估)</strong>：通过统计指标（如 Accuracy、轮廓系数等）解释和剔除无用模式。</li>
-    <li><strong>Deployment (部署)</strong>：将模型导出运用。</li>
+    <li><strong>Data cleaning (数据清洗)</strong>：移除噪声 (noise) 和不一致的数据。</li>
+    <li><strong>Data integration (数据集成)</strong>：将多个数据源 (multiple data sources) 组合在一起。</li>
+    <li><strong>Data selection (数据选择)</strong>：从数据库中检索与分析任务相关的数据。</li>
+    <li><strong>Data transformation (数据转换)</strong>：通过执行汇总或聚集操作，将数据转换或统一成适合数据挖掘的形式。</li>
+    <li><strong>Data mining (数据挖掘)</strong>：KDD 中最核心的步骤，应用智能方法提取数据模式 (data patterns)。</li>
+    <li><strong>Pattern evaluation (模式评估)</strong>：基于某些有趣性度量 (interestingness measures) 识别出真正代表知识的有趣模式。</li>
+    <li><strong>Knowledge presentation (知识表示)</strong>：使用可视化和知识表示技术向用户展示挖掘出的知识。</li>
 </ol>
 <h2>2. 数据集与属性的类型深度剖析</h2>
 <p>在 WEKA 的 ARFF 文件格式中，属性类型的设定极其严格。算法的表现高度依赖特征的数据类型：</p>
@@ -40,8 +35,8 @@ m01 = """
 </ul>
 
 <h3>🎯 Mock Exam 经典例题</h3>
-<p><strong>【Q1. 简答题】</strong>请列举出 KDD (Knowledge Discovery from Databases) 的五个核心步骤，并指明哪一个步骤在工业界耗时最长？</p>
-<p><strong>【解答】</strong>: 五个步骤分别为：数据准备 (Data Preparation)、数据预处理 (Data Pre-processing)、数据挖掘 (Data Mining)、模式评估 (Pattern Evaluation)、部署 (Deployment)。其中，数据预处理由于涉及繁琐的清洗、缺失值填补和特征转换，通常占用超过 70% 的整体耗时。</p>
+<p><strong>【Q1. 简答题】</strong>请严格按照讲义定义，列举出完整的 KDD (Knowledge Discovery from Databases) 过程所包含的 7 个步骤。</p>
+<p><strong>【解答】</strong>: 完整的 KDD 步骤包含：<br>1. Data cleaning (数据清洗)<br>2. Data integration (数据集成)<br>3. Data selection (数据选择)<br>4. Data transformation (数据转换)<br>5. Data mining (数据挖掘)<br>6. Pattern evaluation (模式评估)<br>7. Knowledge presentation (知识表示)</p>
 <p><strong>【Q2. 计算题】</strong>给出两个向量 $X = (1, 3)$ 和 $Y = (4, 7)$，请分别计算它们之间的曼哈顿距离、欧氏距离和切比雪夫距离。</p>
 <p><strong>【解答】</strong>:<br>
 - 曼哈顿距离 ($L_1$): $|1-4| + |3-7| = 3 + 4 = 7$<br>
