@@ -248,180 +248,96 @@ body {
 <body>
 
 <nav class="topbar">
-  <div class="topbar-brand" onclick="goHome()">
+  <div class="topbar-brand" onclick="window.location.href='index.html'">
     <span class="badge-cs">CS5483</span>
     <span class="topbar-title">Data Warehousing & Data Mining</span>
   </div>
   <span class="topbar-status">15 个模块 · 期末考试导向</span>
 </nav>
 
-<div id="main-view">
-  <header class="hero">
-    <div class="kicker">Final Exam Navigator</div>
-    <h1>CS5483 数据挖掘复习指南</h1>
-    <p class="sub">涵盖分类、聚类、关联规则与数据仓库的核心算法与评估方法</p>
-  </header>
+<div id="detail-view" style="display: block; max-width: 900px; margin: 60px auto 100px; padding: 60px 80px; background: #fff; border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1); position: relative;">
+  <div class="back-nav" style="position: sticky; top: 20px; z-index: 10; margin-bottom: 40px;">
+    <button class="btn-back" onclick="window.location.href='index.html'" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: rgba(255,255,255,0.9); color: var(--ink); border-radius: 999px; font-weight: 700; font-size: 15px; cursor: pointer; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05); backdrop-filter: blur(10px); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      返回复习大厅
+    </button>
+  </div>
+  <div id="detail-content" class="detail-content">
+    
+<h1>MODULE 06: Ensemble Methods (集成学习)</h1>
+<p style="font-size: 14px; color: var(--muted); border-left: 4px solid var(--border); padding-left: 12px; margin-top: -16px; margin-bottom: 32px;">📄 <strong>参考讲义：</strong><code>EnsembleMethods.pptx</code></p>
+<div class="highlight"><strong>核心考点：</strong>Bias-Variance 偏差与方差的权衡、Bagging的Bootstrap机制、Random Forest特征随机化、Boosting(AdaBoost)的加权机制。</div>
+<h2>1. 集成学习的核心思想 (Ensemble Philosophy)</h2>
+<p>单一分类器常面临性能瓶颈：如浅层决策树通常具有较高的 <strong>偏差 (Bias)</strong>，容易欠拟合；而深层决策树则具有较高的 <strong>方差 (Variance)</strong>，容易对噪声产生过拟合。<br>
+<strong>Ensemble (集成)</strong> 方法通过结合多个独立且具备 <strong>多样性 (Diverse)</strong> 的基分类器，能够有效平滑噪声以降低方差，或通过串联纠错机制降低偏差，从而显著提升泛化能力。</p>
 
-  <section class="exam-priority">
-    <h2>核心重点板块</h2>
-    <p class="weight-note">根据课程内容与重点，梳理以下三大模块集群，明确复习重点。</p>
-    <div class="weight-grid">
-      <div class="weight-card basic">
-        <strong>分类算法</strong>
-        <h3>Classification & Evaluation</h3>
-        <p><span class="module-list">M02 - M07</span><br>核心考察：决策树(Gini/Entropy)、KNN、基于规则、集成学习(Bagging/Boosting)，以及过拟合与评估矩阵(ROC/AUC)。</p>
-      </div>
-      <div class="weight-card calc">
-        <strong>聚类算法</strong>
-        <h3>Cluster Analysis</h3>
-        <p><span class="module-list">M09 - M11</span><br>核心考察：K-Means (优缺点与限制)、层次聚类 (Single/Complete linkage对比) 以及 DBSCAN (核心点/密度可达判别)。</p>
-      </div>
-      <div class="weight-card combined">
-        <strong>数据与模式</strong>
-        <h3>Data Cube & Frequent Pattern</h3>
-        <p><span class="module-list">M08, M12, M13</span><br>核心考察：Apriori 先验性质与剪枝，OLAP (Roll-up/Drill-down)，BUC 自底向上算法与冰山立方体计算。</p>
-      </div>
-    </div>
-  </section>
+<h2>2. 常见集成算法执行流</h2>
+<p><strong>Bagging (Bootstrap Aggregation 装袋法)：降低方差 (Reduce Variance)</strong></p>
+<p><strong>输入：</strong>原始数据集；基分类器数量 $M$。<br>
+<strong>输出：</strong>集成后的强分类器预测结果。</p>
+<ol>
+    <li><strong>[并行启动]</strong>：对包含 $N$ 条样本的原始数据集，并行启动 $M$ 个训练过程。</li>
+    <li><strong>[抽样组集]</strong>：每个过程通过 <strong>有放回抽样</strong> $N$ 次构建子数据集（约有 36.8% 的样本未被抽中，称为 OOB 数据）。</li>
+    <li><strong>[独立训练]</strong>：各个过程独立训练一个不受限的高复杂度基分类器（如深层决策树）。</li>
+    <li><strong>[多数投票]</strong>：测试时，所有基分类器对新样本进行预测，分类任务采用 <strong>多数投票 (Majority Voting)</strong>，回归任务取平均。平均效应能够抵消单个分类器的随机误差，大幅降低方差。</li>
+</ol>
 
-  <section class="study-paths">
-    <h2>学习路径指南</h2>
-    <div class="paths-grid">
-      <div class="path-card">
-        <h3>路径 A：预测与分类模型</h3>
-        <p class="path-desc">梳理各种分类算法的原理、步骤，以及它们在过拟合和评估矩阵上的比较。</p>
-        <div class="path-chain">
-          <span class="path-step">M03 决策树</span><span class="path-arrow">→</span>
-          <span class="path-step">M04 KNN</span><span class="path-arrow">→</span>
-          <span class="path-step">M05 规则</span><span class="path-arrow">→</span>
-          <span class="path-step">M06 集成</span><span class="path-arrow">→</span>
-          <span class="path-step">M07 评估</span>
-        </div>
-      </div>
-      <div class="path-card">
-        <h3>路径 B：无监督聚类体系</h3>
-        <p class="path-desc">理解聚类的目标，横向对比三种经典算法如何处理不同形状与噪声数据。</p>
-        <div class="path-chain">
-          <span class="path-step">M09 划分/层次</span><span class="path-arrow">→</span>
-          <span class="path-step">M10 DBSCAN</span><span class="path-arrow">→</span>
-          <span class="path-step">M11 聚类评估</span>
-        </div>
-      </div>
-      <div class="path-card">
-        <h3>路径 C：数据结构与频繁项</h3>
-        <p class="path-desc">从事务数据的关联规则提取，到多维数据仓库的 OLAP 和底层 Cube 计算。</p>
-        <div class="path-chain">
-          <span class="path-step">M08 Apriori</span><span class="path-arrow">→</span>
-          <span class="path-step">M12 OLAP</span><span class="path-arrow">→</span>
-          <span class="path-step">M13 BUC算法</span>
-        </div>
-      </div>
-    </div>
-  </section>
+<p><strong>Random Forest (随机森林)：提升特征多样性</strong></p>
+<p><strong>输入：</strong>原始数据集；决策树数量 $M$；特征子集大小 $K$。<br>
+<strong>输出：</strong>随机森林集成模型。</p>
+<ol>
+    <li><strong>[继承抽样]</strong>：继承 Bagging 的 Bootstrap 抽样机制。</li>
+    <li><strong>[屏蔽全量特征]</strong>：在构建每棵决策树的每一个分裂节点时，算法 <strong>不评估所有特征</strong>。</li>
+    <li><strong>[随机特征子集]</strong>：而是随机抽取一个包含 $K$ 个特征的子集（通常 $K=\log_2M+1$）。</li>
+    <li><strong>[特征选择]</strong>：决策树仅能在该随机子集中选择最优特征进行分裂。这种特征层面的随机化进一步降低了树与树之间的相关性，提升了集成的 <strong>多样性 (Diversity)</strong>，使得平滑方差的效果更佳。</li>
+</ol>
 
-  <section class="modules-wrap" id="modules">
-    <div class="modules-head">
-      <h2>15大核心模块</h2>
-      <p>点击卡片进入对应模块的阅读页。</p>
-    </div>
+<p><strong>AdaBoost (Adaptive Boosting)：降低偏差 (Reduce Bias)</strong></p>
+<p><strong>输入：</strong>原始数据集；弱分类器数量 $M$。<br>
+<strong>输出：</strong>加权投票的强分类器模型。</p>
+<ol>
+    <li><strong>[初始化权重]</strong>：采用串行方式，训练一系列弱分类器（如单层决策树 Decision Stump）。初始时，所有样本被赋予相等的权重。</li>
+    <li><strong>[基分类器训练]</strong>：第一棵基分类器进行训练后，必然会错误分类一部分难例样本。</li>
+    <li><strong>[权重更新]</strong>：系统将这些被错误分类的样本的 <strong>权重提升 (Increase weight)</strong>，并降低分类正确样本的权重。</li>
+    <li><strong>[串行修正]</strong>：后续的分类器被迫专注于拟合上一轮具有较高权重的错分样本。此过程迭代进行，逐步修正前期模型的偏差。</li>
+    <li><strong>[加权投票]</strong>：测试时，所有分类器参与投票。系统根据各分类器在训练阶段的 <strong>错误率</strong> 为其分配权重 ($\alpha_m = \frac{1}{2} \ln \left(\frac{1-\epsilon}{\epsilon}\right)$)，错误率越低的分类器拥有越大的决策话语权。</li>
+</ol>
 
-    <!-- Category 1 -->
-    <div class="section-title">I. 基础概念与模型评估</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m01.html\'">
-        <div class="mc-num">MODULE 01</div><span class="mc-badge normal">基础</span>
-        <h3>概述与数据预处理</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m02.html\'">
-        <div class="mc-num">MODULE 02</div><span class="mc-badge star">⭐必考计算</span>
-        <h3>分类模型性能评估</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m07.html\'">
-        <div class="mc-num">MODULE 07</div><span class="mc-badge scope">理论基础</span>
-        <h3>过拟合与模型评估</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
+<p><strong>Stacking (堆叠法):</strong></p>
+<p><strong>输入：</strong>训练数据集；多种不同类型的初级基分类器；高阶元分类器。<br>
+<strong>输出：</strong>Stacking 集成模型。</p>
+<ol>
+    <li><strong>[基础层预测]</strong>：在基础层使用多种不同类型的基分类器（例如决策树、KNN、朴素贝叶斯）。</li>
+    <li><strong>[获取结果]</strong>：将测试样本输入这些基分类器，得到各自的预测结果。</li>
+    <li><strong>[特征重组]</strong>：将这些预测结果组合成全新的特征向量。</li>
+    <li><strong>[元分类器融合]</strong>：将新特征向量输入更高阶的 <strong>元分类器 (Meta Classifier)</strong>，由其学习如何结合这些底层预测，得出最终结论。</li>
+</ol>
 
-    <!-- Category 2 -->
-    <div class="section-title">II. 分类与预测算法</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m03.html\'">
-        <div class="mc-num">MODULE 03</div><span class="mc-badge scope">核心算法</span>
-        <h3>决策树</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m04.html\'">
-        <div class="mc-num">MODULE 04</div><span class="mc-badge scope">核心算法</span>
-        <h3>K-近邻学习 (KNN)</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m05.html\'">
-        <div class="mc-num">MODULE 05</div><span class="mc-badge scope">核心算法</span>
-        <h3>基于规则分类</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m06.html\'">
-        <div class="mc-num">MODULE 06</div><span class="mc-badge star">⭐高频考点</span>
-        <h3>集成学习方法</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
+<h2>3. 集成投票机制 (Voting Strategies)</h2>
+<p>在集成学习中，如何将多个基分类器的预测结果进行融合以做出最终决策是极其关键的一环。常见的投票与融合策略包括：</p>
+<ul>
+    <li><strong>多数投票 (Majority / Hard Voting)</strong>：每个基分类器直接输出其预测类别（硬标签），所有分类器“一人一票”，得票最多的类别即为集成的最终输出。常用于 Bagging 和 Random Forest 的分类任务。</li>
+    <li><strong>加权投票 (Weighted Voting)</strong>：根据基分类器在训练或验证集上的可靠性（如错误率）为其分配不同的决策权重。预测准确率越高的基模型拥有越大的话语权，如 AdaBoost 的加权决策机制。</li>
+    <li><strong>软投票 (Soft Voting / Probability Averaging)</strong>：基分类器不直接输出硬标签，而是输出属于各个类别的 <strong>概率得分</strong>（置信度）。集成系统对所有模型的概率进行加权或直接求均值，取平均概率最大的类别。由于保留了置信度细粒度信息，软投票通常比多数硬投票的表现更为优异。</li>
+</ul>
 
-    <!-- Category 3 -->
-    <div class="section-title">III. 无监督聚类分析</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m09.html\'">
-        <div class="mc-num">MODULE 09</div><span class="mc-badge scope">核心算法</span>
-        <h3>划分与层次聚类</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m10.html\'">
-        <div class="mc-num">MODULE 10</div><span class="mc-badge scope">核心算法</span>
-        <h3>基于密度的聚类</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m11.html\'">
-        <div class="mc-num">MODULE 11</div><span class="mc-badge normal">评估指标</span>
-        <h3>聚类分析评估</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
+<h3>🎯 经典例题</h3>
+<p><strong>【Q1. 加权公式推演题】</strong>在 AdaBoost 中，如果第 $m$ 个基分类器的加权错误率 $\epsilon_m$ 等于 0.2，请写出分配给这棵树的权重 $\alpha_m$ 的计算过程。</p>
+<p><strong>【解答】</strong>:<br>
+在 AdaBoost 中，单棵树的权重公式为：$\alpha_m = \frac{1}{2} \ln \left( \frac{1 - \epsilon_m}{\epsilon_m} \right)$。<br>
+代入 $\epsilon_m = 0.2$，得到 $\alpha_m = \frac{1}{2} \ln \left( \frac{1 - 0.2}{0.2} \right) = \frac{1}{2} \ln (4)$。<br>
+因其错误率较低，该分类器将在最终投票中获得较高的决策权重。</p>
+<p><strong>【Q2. 概念分析】</strong>为了解决过度深层决策树产生的过拟合问题，应倾向于选择 AdaBoost 还是 Random Forest 算法？为什么？</p>
+<p><strong>【解答】</strong>: 应选择 <strong>Random Forest (随机森林) / Bagging 方法</strong>。<br>
+极深的决策树属于**低偏差、高方差**（Low Bias, High Variance）模型。Bagging 通过 Bootstrap 采样与随机特征选取，集成多棵高方差树，利用平均效应有效降低整体方差 (Reduce variance)，解决过拟合问题。<br>相对而言，AdaBoost 的设计目标是**降低偏差**（Reduce bias），适用于提升简单弱分类器（高偏差）的表现。将过拟合的深树放入 AdaBoost 会进一步放大其对噪声的拟合，导致更严重的泛化失败。</p>
 
-    <!-- Category 4 -->
-    <div class="section-title">IV. 频繁模式与数据仓库</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m08.html\'">
-        <div class="mc-num">MODULE 08</div><span class="mc-badge star">⭐必考逻辑</span>
-        <h3>频繁模式：Apriori</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m12.html\'">
-        <div class="mc-num">MODULE 12</div><span class="mc-badge scope">体系结构</span>
-        <h3>数据仓库与 OLAP</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m13.html\'">
-        <div class="mc-num">MODULE 13</div><span class="mc-badge star">⭐重点算法</span>
-        <h3>数据立方体计算</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 5 -->
-    <div class="section-title" style="color: var(--orange);">V. 专题复习</div>
-    <div class="modules-grid">
-      <div class="module-card" onclick="window.location.href=\'m14.html\'">
-        <div class="mc-num">MODULE 14</div><span class="mc-badge star">⭐核心专题</span>
-        <h3>计算题专题</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m15.html\'">
-        <div class="mc-num">MODULE 15</div><span class="mc-badge star">⭐核心专题</span>
-        <h3>算法伪代码专题</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-  </section>
-
-  <footer class="footer">
-    <strong>CS5483 Data Warehousing & Data Mining</strong> · Semester B 2025/26<br>
-    本地化完全静态页面 · 期末考试复习指南
-  </footer>
+  </div>
 </div>
 
-
-  <div id="detail-content" class="detail-content"></div>
-</div>
-
-
+<footer class="footer" style="text-align: center; padding: 40px 24px; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; background: #fff;">
+  <strong>CS5483 Data Warehousing & Data Mining</strong> · Semester B 2025/26<br>
+  本地化完全静态页面 · 期末考试复习指南
+</footer>
 
 </body>
 </html>

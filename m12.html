@@ -248,180 +248,78 @@ body {
 <body>
 
 <nav class="topbar">
-  <div class="topbar-brand" onclick="goHome()">
+  <div class="topbar-brand" onclick="window.location.href='index.html'">
     <span class="badge-cs">CS5483</span>
     <span class="topbar-title">Data Warehousing & Data Mining</span>
   </div>
   <span class="topbar-status">15 个模块 · 期末考试导向</span>
 </nav>
 
-<div id="main-view">
-  <header class="hero">
-    <div class="kicker">Final Exam Navigator</div>
-    <h1>CS5483 数据挖掘复习指南</h1>
-    <p class="sub">涵盖分类、聚类、关联规则与数据仓库的核心算法与评估方法</p>
-  </header>
+<div id="detail-view" style="display: block; max-width: 900px; margin: 60px auto 100px; padding: 60px 80px; background: #fff; border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1); position: relative;">
+  <div class="back-nav" style="position: sticky; top: 20px; z-index: 10; margin-bottom: 40px;">
+    <button class="btn-back" onclick="window.location.href='index.html'" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: rgba(255,255,255,0.9); color: var(--ink); border-radius: 999px; font-weight: 700; font-size: 15px; cursor: pointer; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05); backdrop-filter: blur(10px); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      返回复习大厅
+    </button>
+  </div>
+  <div id="detail-content" class="detail-content">
+    
+<h1>MODULE 12: Data Warehouse & OLAP (数据仓库与多维分析)</h1>
+<p style="font-size: 14px; color: var(--muted); border-left: 4px solid var(--border); padding-left: 12px; margin-top: -16px; margin-bottom: 32px;">📄 <strong>参考讲义：</strong><code>DataWarehouse_DCOLAP.pptx</code></p>
+<div class="highlight"><strong>核心考点：</strong>OLTP与OLAP架构差异、基于维度与事实的星型建模、Lattice晶格组合、以及四种 OLAP 多维查询操作 (Roll-up, Drill-down, Slice, Dice)。</div>
+<h2>1. OLTP 与 OLAP 系统的差异</h2>
+<p><strong>OLTP (联机事务处理)</strong> 面向日常业务操作，支持高并发的插入、更新和删除事务，优化数据一致性。若在其上执行涉及全库扫描的大规模聚合查询，会消耗大量资源并可能锁定表。<br>
+为满足企业级报表与分析需求，<strong>Data Warehouse (数据仓库)</strong> 应运而生。数据仓库基于 <strong>OLAP (联机分析处理)</strong> 架构，通过预先计算汇总历史数据，存储在多维的 Data Cube (数据立方体) 中，实现对复杂聚合查询的毫秒级响应。</p>
+<h2>2. 维度建模 (Dimension Modeling) 与 Schema 模式</h2>
+<p>数据仓库的核心是多维数据模型，其包含两类基本表：</p>
+<ul>
+    <li><strong>Dimension (维度表)</strong>：分析观察业务的角度与层级属性，如时间、地点、产品等，提供数据过滤和分组的依据。</li>
+    <li><strong>Fact / Measure (事实表与度量)</strong>：包含被量化分析的核心业务指标数值（如销售量、金额）以及指向各个维度表的键。</li>
+</ul>
+<h3>三大经典多维数据 Schema 模式：</h3>
+<ul>
+    <li><strong>Star Schema (星型模式)</strong>：<br>
+        最常见、最简单的模式。中心是一个巨大的事实表，周围环绕着多个非规范化（即存在一定冗余）的维度表，整体呈现放射状星型结构。查询效率高，但维度表可能占用更多存储空间。</li>
+    <li><strong>Snowflake Schema (雪花模式)</strong>：<br>
+        星型模式的变体。将星型模式中庞大的维度表进一步规范化（拆分），分解成多个相关的子维度表，形成类似雪花的层级结构。优点是减少了数据冗余和存储空间，缺点是增加了查询时的表连接 (Join) 数量，降低了查询性能。</li>
+    <li><strong>Fact Constellation (事实星座模式 / 星系模式)</strong>：<br>
+        包含多个事实表，且这些事实表共享部分公共维度表。适用于复杂的企业级数据仓库架构，能够支持跨越多个业务主题（如销售与库存）的综合性交叉分析。</li>
+</ul>
 
-  <section class="exam-priority">
-    <h2>核心重点板块</h2>
-    <p class="weight-note">根据课程内容与重点，梳理以下三大模块集群，明确复习重点。</p>
-    <div class="weight-grid">
-      <div class="weight-card basic">
-        <strong>分类算法</strong>
-        <h3>Classification & Evaluation</h3>
-        <p><span class="module-list">M02 - M07</span><br>核心考察：决策树(Gini/Entropy)、KNN、基于规则、集成学习(Bagging/Boosting)，以及过拟合与评估矩阵(ROC/AUC)。</p>
-      </div>
-      <div class="weight-card calc">
-        <strong>聚类算法</strong>
-        <h3>Cluster Analysis</h3>
-        <p><span class="module-list">M09 - M11</span><br>核心考察：K-Means (优缺点与限制)、层次聚类 (Single/Complete linkage对比) 以及 DBSCAN (核心点/密度可达判别)。</p>
-      </div>
-      <div class="weight-card combined">
-        <strong>数据与模式</strong>
-        <h3>Data Cube & Frequent Pattern</h3>
-        <p><span class="module-list">M08, M12, M13</span><br>核心考察：Apriori 先验性质与剪枝，OLAP (Roll-up/Drill-down)，BUC 自底向上算法与冰山立方体计算。</p>
-      </div>
-    </div>
-  </section>
+<h2>3. Lattice Structure (晶格网络) 与 OLAP 操作</h2>
+<p><strong>Lattice Structure (晶格网络)</strong>：<br>
+包含 $N$ 个维度的 Data Cube 会生成 $2^N$ 种不同聚合程度的 <strong>Cuboids (立方体视图)</strong>。它们从包含全维度的最精细基础视图 (Base Cuboid) 逐层向上归总，直到 0-D 没有任何维度限制的 <strong>Apex Cuboid (全量汇总)</strong>，整体构成了具有偏序关系的晶格层级网络。</p>
+<h2>3. 四大核心 OLAP 操作</h2>
+<p>基于预定义的概念层级 (Concept Hierarchies，如：日 $\rightarrow$ 月 $\rightarrow$ 年)，用户可在多维数据模型中进行灵活的交互式分析：</p>
+<ul>
+    <li><strong>Roll-up (上卷 / 归约)</strong>：<br>
+        动作：消除某个细分维度，或沿维度概念层级向上合并数据。<br>
+        效果：使数据从微观趋向宏观，汇总粒度变粗（如将每日销量上卷为按月统计）。</li>
+    <li><strong>Drill-down (下钻 / 细化)</strong>：<br>
+        动作：引入新的切分维度，或沿维度层级向下分解数据。<br>
+        效果：提供更详细的微观视图，数据粒度变细（如将某省份数据拆解至各个城市）。</li>
+    <li><strong>Slice (切片)</strong>：<br>
+        动作：在单一维度上固定一个特定数值条件。<br>
+        效果：从多维立方体中截取一张二维平面的数据切片（例如限制查询条件为 <code>"年份 = 2025年"</code>）。</li>
+    <li><strong>Dice (切块)</strong>：<br>
+        动作：同时在多个维度上划定取值范围进行条件约束。<br>
+        效果：从完整立方体中抽取特定的子数据块（例如查询 <code>"年份 = 2025"</code> 且 <code>"区域 = 华南"</code> 且 <code>"类别 = 电子产品"</code> 的数据）。</li>
+</ul>
+<h3>🎯 经典例题</h3>
+<p><strong>【Q1. 操作判定题】</strong>在记录 (Time, Location, Item) 三维数据的系统中，判断以下查询需求对应哪一种 OLAP 操作：<br>
+A：不看月份明细与产品型号，直接汇总全年的总营业额。<br>
+B：提取广州和深圳第一季度手机品类的具体销售数据报表。</p>
+<p><strong>【解答】</strong>:<br>
+- <strong>A 对应 Roll-up (上卷)</strong>。查询摒弃了地点与产品细分维度，并将时间沿概念层级上卷汇总至全年，展现了宏观数据。<br>
+- <strong>B 对应 Dice (切块)</strong>。该查询在三个维度上均进行了条件限定（地点限定广深，时间限定一季度，商品限定手机），属于在多维空间中提取局部子块的操作。</p>
 
-  <section class="study-paths">
-    <h2>学习路径指南</h2>
-    <div class="paths-grid">
-      <div class="path-card">
-        <h3>路径 A：预测与分类模型</h3>
-        <p class="path-desc">梳理各种分类算法的原理、步骤，以及它们在过拟合和评估矩阵上的比较。</p>
-        <div class="path-chain">
-          <span class="path-step">M03 决策树</span><span class="path-arrow">→</span>
-          <span class="path-step">M04 KNN</span><span class="path-arrow">→</span>
-          <span class="path-step">M05 规则</span><span class="path-arrow">→</span>
-          <span class="path-step">M06 集成</span><span class="path-arrow">→</span>
-          <span class="path-step">M07 评估</span>
-        </div>
-      </div>
-      <div class="path-card">
-        <h3>路径 B：无监督聚类体系</h3>
-        <p class="path-desc">理解聚类的目标，横向对比三种经典算法如何处理不同形状与噪声数据。</p>
-        <div class="path-chain">
-          <span class="path-step">M09 划分/层次</span><span class="path-arrow">→</span>
-          <span class="path-step">M10 DBSCAN</span><span class="path-arrow">→</span>
-          <span class="path-step">M11 聚类评估</span>
-        </div>
-      </div>
-      <div class="path-card">
-        <h3>路径 C：数据结构与频繁项</h3>
-        <p class="path-desc">从事务数据的关联规则提取，到多维数据仓库的 OLAP 和底层 Cube 计算。</p>
-        <div class="path-chain">
-          <span class="path-step">M08 Apriori</span><span class="path-arrow">→</span>
-          <span class="path-step">M12 OLAP</span><span class="path-arrow">→</span>
-          <span class="path-step">M13 BUC算法</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="modules-wrap" id="modules">
-    <div class="modules-head">
-      <h2>15大核心模块</h2>
-      <p>点击卡片进入对应模块的阅读页。</p>
-    </div>
-
-    <!-- Category 1 -->
-    <div class="section-title">I. 基础概念与模型评估</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m01.html\'">
-        <div class="mc-num">MODULE 01</div><span class="mc-badge normal">基础</span>
-        <h3>概述与数据预处理</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m02.html\'">
-        <div class="mc-num">MODULE 02</div><span class="mc-badge star">⭐必考计算</span>
-        <h3>分类模型性能评估</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m07.html\'">
-        <div class="mc-num">MODULE 07</div><span class="mc-badge scope">理论基础</span>
-        <h3>过拟合与模型评估</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 2 -->
-    <div class="section-title">II. 分类与预测算法</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m03.html\'">
-        <div class="mc-num">MODULE 03</div><span class="mc-badge scope">核心算法</span>
-        <h3>决策树</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m04.html\'">
-        <div class="mc-num">MODULE 04</div><span class="mc-badge scope">核心算法</span>
-        <h3>K-近邻学习 (KNN)</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m05.html\'">
-        <div class="mc-num">MODULE 05</div><span class="mc-badge scope">核心算法</span>
-        <h3>基于规则分类</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m06.html\'">
-        <div class="mc-num">MODULE 06</div><span class="mc-badge star">⭐高频考点</span>
-        <h3>集成学习方法</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 3 -->
-    <div class="section-title">III. 无监督聚类分析</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m09.html\'">
-        <div class="mc-num">MODULE 09</div><span class="mc-badge scope">核心算法</span>
-        <h3>划分与层次聚类</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m10.html\'">
-        <div class="mc-num">MODULE 10</div><span class="mc-badge scope">核心算法</span>
-        <h3>基于密度的聚类</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m11.html\'">
-        <div class="mc-num">MODULE 11</div><span class="mc-badge normal">评估指标</span>
-        <h3>聚类分析评估</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 4 -->
-    <div class="section-title">IV. 频繁模式与数据仓库</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m08.html\'">
-        <div class="mc-num">MODULE 08</div><span class="mc-badge star">⭐必考逻辑</span>
-        <h3>频繁模式：Apriori</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m12.html\'">
-        <div class="mc-num">MODULE 12</div><span class="mc-badge scope">体系结构</span>
-        <h3>数据仓库与 OLAP</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m13.html\'">
-        <div class="mc-num">MODULE 13</div><span class="mc-badge star">⭐重点算法</span>
-        <h3>数据立方体计算</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 5 -->
-    <div class="section-title" style="color: var(--orange);">V. 专题复习</div>
-    <div class="modules-grid">
-      <div class="module-card" onclick="window.location.href=\'m14.html\'">
-        <div class="mc-num">MODULE 14</div><span class="mc-badge star">⭐核心专题</span>
-        <h3>计算题专题</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m15.html\'">
-        <div class="mc-num">MODULE 15</div><span class="mc-badge star">⭐核心专题</span>
-        <h3>算法伪代码专题</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-  </section>
-
-  <footer class="footer">
-    <strong>CS5483 Data Warehousing & Data Mining</strong> · Semester B 2025/26<br>
-    本地化完全静态页面 · 期末考试复习指南
-  </footer>
+  </div>
 </div>
 
-
-  <div id="detail-content" class="detail-content"></div>
-</div>
-
-
+<footer class="footer" style="text-align: center; padding: 40px 24px; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; background: #fff;">
+  <strong>CS5483 Data Warehousing & Data Mining</strong> · Semester B 2025/26<br>
+  本地化完全静态页面 · 期末考试复习指南
+</footer>
 
 </body>
 </html>

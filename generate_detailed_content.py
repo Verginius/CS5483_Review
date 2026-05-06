@@ -819,42 +819,67 @@ m15 = """
 </ul>
 """
 
-# Extract the data directly to a data.js file
-data_js_content = f"""const modulesData = {{
-  m01: {json.dumps(m01)},
-  m02: {json.dumps(m02)},
-  m03: {json.dumps(m03)},
-  m04: {json.dumps(m04)},
-  m05: {json.dumps(m05)},
-  m06: {json.dumps(m06)},
-  m07: {json.dumps(m07)},
-  m08: {json.dumps(m08)},
-  m09: {json.dumps(m09)},
-  m10: {json.dumps(m10)},
-  m11: {json.dumps(m11)},
-  m12: {json.dumps(m12)},
-  m13: {json.dumps(m13)},
-  m14: {json.dumps(m14)},
-  m15: {json.dumps(m15)}
-}};"""
-
-with open('data.js', 'w', encoding='utf-8') as f:
-    f.write(data_js_content)
-print("data.js updated with embedded pseudo-code steps in every module.")
-
-# Update index.html to ensure JS logic still remains perfectly decoupled
+# Extract head from index.html to wrap each module
+import re
 with open('index.html', 'r', encoding='utf-8') as f:
     html_content = f.read()
+head_match = re.search(r'(<head>.*?</head>)', html_content, re.DOTALL)
+head = head_match.group(1) if head_match else ''
 
-# If the <script src="data.js"> isn't present, add it. The file was fixed in previous steps but just in case.
-if "data.js" not in html_content:
-    start_marker = "const modulesData = {"
-    end_marker = "function openModule(modId) {"
-    start_idx = html_content.find(start_marker)
-    end_idx = html_content.find(end_marker)
+module_template = f"""<!DOCTYPE html>
+<html lang="zh-CN">
+{{head}}
+<body>
 
-    if start_idx != -1 and end_idx != -1:
-        new_html = html_content[:start_idx] + "</script>\n<script src=\"data.js\"></script>\n<script>\n" + html_content[end_idx:]
-        with open('index.html', 'w', encoding='utf-8') as f:
-            f.write(new_html)
-        print("index.html fixed with decouple linkage to data.js.")
+<nav class="topbar">
+  <div class="topbar-brand" onclick="window.location.href='index.html'">
+    <span class="badge-cs">CS5483</span>
+    <span class="topbar-title">Data Warehousing & Data Mining</span>
+  </div>
+  <span class="topbar-status">15 个模块 · 期末考试导向</span>
+</nav>
+
+<div id="detail-view" style="display: block; max-width: 900px; margin: 60px auto 100px; padding: 60px 80px; background: #fff; border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1); position: relative;">
+  <div class="back-nav" style="position: sticky; top: 20px; z-index: 10; margin-bottom: 40px;">
+    <button class="btn-back" onclick="window.location.href='index.html'" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: rgba(255,255,255,0.9); color: var(--ink); border-radius: 999px; font-weight: 700; font-size: 15px; cursor: pointer; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05); backdrop-filter: blur(10px); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      返回复习大厅
+    </button>
+  </div>
+  <div id="detail-content" class="detail-content">
+    {{content}}
+  </div>
+</div>
+
+<footer class="footer" style="text-align: center; padding: 40px 24px; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; background: #fff;">
+  <strong>CS5483 Data Warehousing & Data Mining</strong> · Semester B 2025/26<br>
+  本地化完全静态页面 · 期末考试复习指南
+</footer>
+
+</body>
+</html>
+"""
+
+modules = {
+    'm01': m01, 'm02': m02, 'm03': m03, 'm04': m04, 'm05': m05,
+    'm06': m06, 'm07': m07, 'm08': m08, 'm09': m09, 'm10': m10,
+    'm11': m11, 'm12': m12, 'm13': m13, 'm14': m14, 'm15': m15
+}
+
+for mod_id, mod_content in modules.items():
+    file_name = f"{mod_id}.html"
+    with open(file_name, 'w', encoding='utf-8') as f:
+        f.write(module_template.replace('{head}', head).replace('{content}', mod_content))
+    print(f"Created {file_name}")
+
+# Now update index.html to remove data.js and JS navigation
+new_html = html_content
+new_html = re.sub(r'onclick="openModule\(\'([m\d]+)\'\)"', r'onclick="window.location.href=\'\1.html\'"', new_html)
+new_html = new_html.replace('<script src="data.js"></script>', '')
+new_html = re.sub(r'<script>\s*function openModule.*?</script>', '', new_html, flags=re.DOTALL)
+new_html = re.sub(r'<div id="detail-view">.*?</div>', '', new_html, flags=re.DOTALL)
+
+with open('index.html', 'w', encoding='utf-8') as f:
+    f.write(new_html)
+
+print("Updated index.html to use individual module HTML files.")

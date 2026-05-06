@@ -248,180 +248,75 @@ body {
 <body>
 
 <nav class="topbar">
-  <div class="topbar-brand" onclick="goHome()">
+  <div class="topbar-brand" onclick="window.location.href='index.html'">
     <span class="badge-cs">CS5483</span>
     <span class="topbar-title">Data Warehousing & Data Mining</span>
   </div>
   <span class="topbar-status">15 个模块 · 期末考试导向</span>
 </nav>
 
-<div id="main-view">
-  <header class="hero">
-    <div class="kicker">Final Exam Navigator</div>
-    <h1>CS5483 数据挖掘复习指南</h1>
-    <p class="sub">涵盖分类、聚类、关联规则与数据仓库的核心算法与评估方法</p>
-  </header>
+<div id="detail-view" style="display: block; max-width: 900px; margin: 60px auto 100px; padding: 60px 80px; background: #fff; border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1); position: relative;">
+  <div class="back-nav" style="position: sticky; top: 20px; z-index: 10; margin-bottom: 40px;">
+    <button class="btn-back" onclick="window.location.href='index.html'" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: rgba(255,255,255,0.9); color: var(--ink); border-radius: 999px; font-weight: 700; font-size: 15px; cursor: pointer; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05); backdrop-filter: blur(10px); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      返回复习大厅
+    </button>
+  </div>
+  <div id="detail-content" class="detail-content">
+    
+<h1>MODULE 10: Density-Based Clustering (基于密度的聚类)</h1>
+<p style="font-size: 14px; color: var(--muted); border-left: 4px solid var(--border); padding-left: 12px; margin-top: -16px; margin-bottom: 32px;">📄 <strong>参考讲义：</strong><code>ClusterAnalysis_DB.pptx</code></p>
+<div class="highlight"><strong>核心考点：</strong>DBSCAN 算法中三类实体（核心点、边界点、噪声点）的定义、密度相连的概念、应对任意形状与抗噪性的原理、以及 OPTICS 应对变密度分布的改进。</div>
+<h2>1. 基于密度聚类的理念</h2>
+<p>K-Means 假设簇为凸形分布，层次单链法易受噪声影响。而 <strong>基于密度的聚类 (Density-Based Clustering)</strong> 认为：聚类结构是被低密度区域分隔开的“高密度连通区域”。只要样本分布的密度符合阈值并保持连通，即可构成一个簇，从而能够识别任意非凸形状并有效过滤噪声。</p>
 
-  <section class="exam-priority">
-    <h2>核心重点板块</h2>
-    <p class="weight-note">根据课程内容与重点，梳理以下三大模块集群，明确复习重点。</p>
-    <div class="weight-grid">
-      <div class="weight-card basic">
-        <strong>分类算法</strong>
-        <h3>Classification & Evaluation</h3>
-        <p><span class="module-list">M02 - M07</span><br>核心考察：决策树(Gini/Entropy)、KNN、基于规则、集成学习(Bagging/Boosting)，以及过拟合与评估矩阵(ROC/AUC)。</p>
-      </div>
-      <div class="weight-card calc">
-        <strong>聚类算法</strong>
-        <h3>Cluster Analysis</h3>
-        <p><span class="module-list">M09 - M11</span><br>核心考察：K-Means (优缺点与限制)、层次聚类 (Single/Complete linkage对比) 以及 DBSCAN (核心点/密度可达判别)。</p>
-      </div>
-      <div class="weight-card combined">
-        <strong>数据与模式</strong>
-        <h3>Data Cube & Frequent Pattern</h3>
-        <p><span class="module-list">M08, M12, M13</span><br>核心考察：Apriori 先验性质与剪枝，OLAP (Roll-up/Drill-down)，BUC 自底向上算法与冰山立方体计算。</p>
-      </div>
-    </div>
-  </section>
+<h2>2. DBSCAN 算法原理与执行流程</h2>
+<p>DBSCAN 依赖两个核心参数：<br>
+1. <strong>Eps ($\epsilon$)</strong>：邻域半径，即距离探测阈值。<br>
+2. <strong>MinPts</strong>：核心点在其 Eps 邻域内需包含的最少样本数要求。</p>
+<h3>数据点的三种类型划分：</h3>
+<ul>
+    <li><strong>Core points (核心点)</strong>：若某样本的 Eps 邻域内样本数 $\ge MinPts$，则为核心点。</li>
+    <li><strong>Border points (边界点)</strong>：邻域内样本数 $< MinPts$，不满足核心点要求，但其位于某个核心点的 Eps 邻域内部，被划分为簇的边缘部分。</li>
+    <li><strong>Noise (噪声点)</strong>：既非核心点也不是边界点，无法归入任何簇的样本。这一机制赋予了 DBSCAN 优良的抗噪性。</li>
+</ul>
+<h3>DBSCAN 的簇扩展流程：</h3>
+<p><strong>输入：</strong>数据集；邻域半径 $Eps$；最小样本数 $MinPts$。<br>
+<strong>输出：</strong>基于密度的聚类簇及噪声点集合。</p>
+<ol>
+    <li><strong>[初始化状态]</strong>：初始化所有数据点为未访问状态 (Unvisited)。</li>
+    <li><strong>[选取起始点]</strong>：随机选取一个未访问点 $A$，标记为已访问。并获取其 Eps 邻域。</li>
+    <li><strong>[判定噪声]</strong>：若邻域样本数 $< MinPts$，将 $A$ 标记为 <strong>Noise</strong>（后续可能被重置为边界点）。</li>
+    <li><strong>[构建新簇]</strong>：若邻域样本数 $\ge MinPts$，$A$ 成为核心点，创建一个新簇 $C$。将邻域内的点加入 $C$ 的考察队列。</li>
+    <li><strong>[密度可达扩展]</strong>：遍历考察队列中的点，若其邻域同样满足核心点条件，则将其邻域内的点也吸纳进队列，通过 <strong>密度相连 (Density-connectedness)</strong> 效应不断扩张簇的规模。</li>
+    <li><strong>[循环迭代]</strong>：簇扩展停止后，重复选择未访问的点，直至所有点均被评估完毕。</li>
+</ol>
 
-  <section class="study-paths">
-    <h2>学习路径指南</h2>
-    <div class="paths-grid">
-      <div class="path-card">
-        <h3>路径 A：预测与分类模型</h3>
-        <p class="path-desc">梳理各种分类算法的原理、步骤，以及它们在过拟合和评估矩阵上的比较。</p>
-        <div class="path-chain">
-          <span class="path-step">M03 决策树</span><span class="path-arrow">→</span>
-          <span class="path-step">M04 KNN</span><span class="path-arrow">→</span>
-          <span class="path-step">M05 规则</span><span class="path-arrow">→</span>
-          <span class="path-step">M06 集成</span><span class="path-arrow">→</span>
-          <span class="path-step">M07 评估</span>
-        </div>
-      </div>
-      <div class="path-card">
-        <h3>路径 B：无监督聚类体系</h3>
-        <p class="path-desc">理解聚类的目标，横向对比三种经典算法如何处理不同形状与噪声数据。</p>
-        <div class="path-chain">
-          <span class="path-step">M09 划分/层次</span><span class="path-arrow">→</span>
-          <span class="path-step">M10 DBSCAN</span><span class="path-arrow">→</span>
-          <span class="path-step">M11 聚类评估</span>
-        </div>
-      </div>
-      <div class="path-card">
-        <h3>路径 C：数据结构与频繁项</h3>
-        <p class="path-desc">从事务数据的关联规则提取，到多维数据仓库的 OLAP 和底层 Cube 计算。</p>
-        <div class="path-chain">
-          <span class="path-step">M08 Apriori</span><span class="path-arrow">→</span>
-          <span class="path-step">M12 OLAP</span><span class="path-arrow">→</span>
-          <span class="path-step">M13 BUC算法</span>
-        </div>
-      </div>
-    </div>
-  </section>
+<h2>3. 变密度数据的局限与 OPTICS 算法</h2>
+<p><strong>DBSCAN 的局限性</strong>：它对全局固定的 Eps 和 MinPts 参数高度敏感。对于具有多种不同密度分布的数据集，单一的阈值难以同时识别高密度簇与低密度簇。</p>
+<h3>OPTICS (Ordering Points To Identify the Clustering Structure)</h3>
+<p>OPTICS 通过构建数据点的一维排序输出，避免了显式生成聚类，并引入了动态距离的概念：<br>
+1. <strong>Core-distance (核心距离)</strong>：使某点恰好满足核心点条件（即包含 MinPts 个点）所需的最小邻域半径。公式：$Core\_distance(p)$。<br>
+2. <strong>Reachability-distance (可达距离)</strong>：某点 $o$ 从核心点 $p$ 处“被可达”的距离。它不能小于 $o$ 自身的核心距离：$Reachability\_distance(p, o) = \max(Core\_distance(o), d(p, o))$。</p>
+<p>基于此，OPTICS 可绘制 <strong>Reachability Plot (可达性图)</strong>。<br>
+图表中的波谷 (Valleys) 表示距离紧凑的密集簇，而高峰表示稀疏区域或噪声点。通过观察可达性图的起伏，分析人员可以识别不同密度级别的聚类结构，有效解决了全局阈值难以适配变密度数据的难题。</p>
 
-  <section class="modules-wrap" id="modules">
-    <div class="modules-head">
-      <h2>15大核心模块</h2>
-      <p>点击卡片进入对应模块的阅读页。</p>
-    </div>
+<h3>🎯 经典例题</h3>
+<p><strong>【Q1. 实体判定题】</strong>执行 DBSCAN，参数 $Eps=1.5$, $MinPts=4$。侦测到点 A 的 1.5 邻域内只有 2 个点（点 A 和点 B）。而点 B 邻域内有 10 个点。请判断点 A 和点 B 的实体类别。</p>
+<p><strong>【解答】</strong>: <br>
+- 点 B 邻域内包含 10 个点 $\ge MinPts$，因此点 B 是 <strong>Core point (核心点)</strong>。<br>
+- 点 A 邻域内仅 2 个点 $< MinPts$，不具备成为核心点的资格。但它被包含在核心点 B 的 1.5 邻域内，因此被判定为 <strong>Border point (边界点)</strong>。</p>
+<p><strong>【Q2. 算法原理题】</strong>如果将 DBSCAN 的 $MinPts$ 设置为 1，此时算法实质上退化为了何种经典聚类方法？请说明理由。</p>
+<p><strong>【解答】</strong>: 会退化为 <strong>Single-linkage Agglomerative (单链法层次聚类)</strong> 结合距离截断。<br>
+当 $MinPts=1$ 时，任何样本点只需包含自己便能满足核心点条件，此时所有点均成为核心点，噪声排除机制失效。随后，只要两点之间的距离 $\le Eps$，它们便会合并为同一簇。最终产生的连通图等同于在构建最小生成树时于 $Eps$ 处截断的结果，与单链法的链式效应如出一辙。</p>
 
-    <!-- Category 1 -->
-    <div class="section-title">I. 基础概念与模型评估</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m01.html\'">
-        <div class="mc-num">MODULE 01</div><span class="mc-badge normal">基础</span>
-        <h3>概述与数据预处理</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m02.html\'">
-        <div class="mc-num">MODULE 02</div><span class="mc-badge star">⭐必考计算</span>
-        <h3>分类模型性能评估</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m07.html\'">
-        <div class="mc-num">MODULE 07</div><span class="mc-badge scope">理论基础</span>
-        <h3>过拟合与模型评估</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 2 -->
-    <div class="section-title">II. 分类与预测算法</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m03.html\'">
-        <div class="mc-num">MODULE 03</div><span class="mc-badge scope">核心算法</span>
-        <h3>决策树</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m04.html\'">
-        <div class="mc-num">MODULE 04</div><span class="mc-badge scope">核心算法</span>
-        <h3>K-近邻学习 (KNN)</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m05.html\'">
-        <div class="mc-num">MODULE 05</div><span class="mc-badge scope">核心算法</span>
-        <h3>基于规则分类</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m06.html\'">
-        <div class="mc-num">MODULE 06</div><span class="mc-badge star">⭐高频考点</span>
-        <h3>集成学习方法</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 3 -->
-    <div class="section-title">III. 无监督聚类分析</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m09.html\'">
-        <div class="mc-num">MODULE 09</div><span class="mc-badge scope">核心算法</span>
-        <h3>划分与层次聚类</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m10.html\'">
-        <div class="mc-num">MODULE 10</div><span class="mc-badge scope">核心算法</span>
-        <h3>基于密度的聚类</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m11.html\'">
-        <div class="mc-num">MODULE 11</div><span class="mc-badge normal">评估指标</span>
-        <h3>聚类分析评估</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 4 -->
-    <div class="section-title">IV. 频繁模式与数据仓库</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m08.html\'">
-        <div class="mc-num">MODULE 08</div><span class="mc-badge star">⭐必考逻辑</span>
-        <h3>频繁模式：Apriori</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m12.html\'">
-        <div class="mc-num">MODULE 12</div><span class="mc-badge scope">体系结构</span>
-        <h3>数据仓库与 OLAP</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m13.html\'">
-        <div class="mc-num">MODULE 13</div><span class="mc-badge star">⭐重点算法</span>
-        <h3>数据立方体计算</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 5 -->
-    <div class="section-title" style="color: var(--orange);">V. 专题复习</div>
-    <div class="modules-grid">
-      <div class="module-card" onclick="window.location.href=\'m14.html\'">
-        <div class="mc-num">MODULE 14</div><span class="mc-badge star">⭐核心专题</span>
-        <h3>计算题专题</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m15.html\'">
-        <div class="mc-num">MODULE 15</div><span class="mc-badge star">⭐核心专题</span>
-        <h3>算法伪代码专题</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-  </section>
-
-  <footer class="footer">
-    <strong>CS5483 Data Warehousing & Data Mining</strong> · Semester B 2025/26<br>
-    本地化完全静态页面 · 期末考试复习指南
-  </footer>
+  </div>
 </div>
 
-
-  <div id="detail-content" class="detail-content"></div>
-</div>
-
-
+<footer class="footer" style="text-align: center; padding: 40px 24px; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; background: #fff;">
+  <strong>CS5483 Data Warehousing & Data Mining</strong> · Semester B 2025/26<br>
+  本地化完全静态页面 · 期末考试复习指南
+</footer>
 
 </body>
 </html>

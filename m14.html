@@ -248,180 +248,87 @@ body {
 <body>
 
 <nav class="topbar">
-  <div class="topbar-brand" onclick="goHome()">
+  <div class="topbar-brand" onclick="window.location.href='index.html'">
     <span class="badge-cs">CS5483</span>
     <span class="topbar-title">Data Warehousing & Data Mining</span>
   </div>
   <span class="topbar-status">15 个模块 · 期末考试导向</span>
 </nav>
 
-<div id="main-view">
-  <header class="hero">
-    <div class="kicker">Final Exam Navigator</div>
-    <h1>CS5483 数据挖掘复习指南</h1>
-    <p class="sub">涵盖分类、聚类、关联规则与数据仓库的核心算法与评估方法</p>
-  </header>
+<div id="detail-view" style="display: block; max-width: 900px; margin: 60px auto 100px; padding: 60px 80px; background: #fff; border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1); position: relative;">
+  <div class="back-nav" style="position: sticky; top: 20px; z-index: 10; margin-bottom: 40px;">
+    <button class="btn-back" onclick="window.location.href='index.html'" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: rgba(255,255,255,0.9); color: var(--ink); border-radius: 999px; font-weight: 700; font-size: 15px; cursor: pointer; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05); backdrop-filter: blur(10px); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      返回复习大厅
+    </button>
+  </div>
+  <div id="detail-content" class="detail-content">
+    
+<h1>MODULE 14: 必考计算题公式汇编</h1>
+<p style="font-size: 14px; color: var(--muted); border-left: 4px solid var(--border); padding-left: 12px; margin-top: -16px; margin-bottom: 32px;">📄 <strong>参考讲义：</strong><code>综合提取自全部幻灯片</code></p>
+<div class="highlight"><strong>专题说明：</strong>汇编各章节涉及公式及推演逻辑，提供计算复习指引。</div>
+<h2>1. 混淆矩阵与性能评估指标</h2>
+<ul>
+    <li><strong>定位：</strong> 行代表 Actual (真实)，列代表 Predicted (预测)。</li>
+    <li><strong>Accuracy (准确率):</strong> $\frac{TP+TN}{TP+TN+FP+FN}$ （在类别失衡时参考性差）</li>
+    <li><strong>Precision (精确率):</strong> $\frac{TP}{TP+FP}$ （预测为正例中真实的比例）</li>
+    <li><strong>Recall / TPR (召回率):</strong> $\frac{TP}{TP+FN}$ （真实正例中被正确预测的比例）</li>
+    <li><strong>Specificity / TNR:</strong> $\frac{TN}{TN+FP}$ （真实负例被正确预测的比例）</li>
+    <li><strong>NPV:</strong> $\frac{TN}{TN+FN}$ （预测为负例中真负例的比例）</li>
+    <li><strong>F-measure (F1-Score):</strong> $2 \times \frac{Precision \times Recall}{Precision + Recall}$</li>
+</ul>
+<h2>2. 决策树分裂与纯度指标</h2>
+<ul>
+    <li><strong>Shannon's Entropy (信息熵):</strong> $H(S) = -\sum_{i=1}^c p_i \log_2(p_i)$</li>
+    <li><strong>Information Gain:</strong> $IG(S, A) = H(S) - \sum_{v \in A} \frac{|S_v|}{|S|} H(S_v)$</li>
+    <li><strong>Split Information:</strong> $SplitInfo(A) = -\sum_{v \in A} \frac{|S_v|}{|S|} \log_2 \left( \frac{|S_v|}{|S|} \right)$</li>
+    <li><strong>Gain Ratio (增益率):</strong> $\frac{IG(S, A)}{SplitInfo(A)}$ （用于克服对多分支属性的偏好）</li>
+    <li><strong>Gini Impurity:</strong> $Gini(S) = 1 - \sum_{i=1}^c p_i^2$ （CART使用）</li>
+</ul>
+<h2>3. 距离计算与标准化</h2>
+<ul>
+    <li><strong>Minkowski Distance:</strong> $d(x, y) = \left( \sum_{i=1}^n |x_i - y_i|^p \right)^{\frac{1}{p}}$ （$p=1$ 为曼哈顿距离，$p=2$ 为欧氏距离，$p \to \infty$ 为切比雪夫距离）</li>
+    <li><strong>Min-Max Normalization:</strong> $v' = \frac{v - \min_A}{\max_A - \min_A}$ </li>
+    <li><strong>Z-score Standardization:</strong> $v' = \frac{v - \mu_A}{\sigma_A}$</li>
+</ul>
+<h2>4. AdaBoost 的加权模型推演</h2>
+<ul>
+    <li><strong>分类器 $m$ 的加权错误率:</strong> $\epsilon_m = \sum_{i=1}^N w_i I(y_i \neq h_m(x_i))$</li>
+    <li><strong>分类器权重 $\alpha_m$:</strong> $\alpha_m = \frac{1}{2} \ln \left( \frac{1 - \epsilon_m}{\epsilon_m} \right)$</li>
+</ul>
+<h2>5. 63.2% Bootstrap 概率推导</h2>
+<ul>
+    <li><strong>$N$ 次有放回抽样全未命中概率极限:</strong> $\lim_{N \to \infty} \left(1 - \frac{1}{N}\right)^N = \frac{1}{e} \approx 36.8\%$</li>
+    <li><strong>单样本被抽中进入训练集的比例:</strong> $1 - 36.8\% = 63.2\%$ </li>
+</ul>
+<h2>6. 关联模式指标</h2>
+<ul>
+    <li><strong>Support (支持度):</strong> $\frac{Count(X \cup Y)}{Total\ Transactions}$</li>
+    <li><strong>Confidence (置信度):</strong> $\frac{Support(X \cup Y)}{Support(X)}$</li>
+    <li><strong>Lift (提升度):</strong> $\frac{P(X \cup Y)}{P(X) \times P(Y)}$ （>1 表明具有正向促进作用）</li>
+</ul>
+<h2>7. 聚类分析计算指标</h2>
+<ul>
+    <li><strong>K-Means 误差平方和 (SSE):</strong> $SSE = \sum_{i=1}^K \sum_{x \in C_i} ||x - \mu_i||^2$</li>
+    <li><strong>Single-Linkage:</strong> $d(A, B) = \min_{x \in A, y \in B} d(x, y)$</li>
+    <li><strong>Complete-Linkage:</strong> $d(A, B) = \max_{x \in A, y \in B} d(x, y)$</li>
+    <li><strong>OPTICS Core-distance:</strong> 满足 $\ge MinPts$ 邻居所需的最短半径</li>
+    <li><strong>OPTICS Reachability-distance:</strong> $\max(Core\_distance(o), d(p, o))$</li>
+    <li><strong>Silhouette Coefficient (轮廓系数):</strong> $s(i) = \frac{b(i) - a(i)}{\max(a(i), b(i))}$</li>
+</ul>
+<h2>8. 规则覆盖与 FOIL 信息增益</h2>
+<ul>
+    <li><strong>FOIL Information Gain:</strong> $FOIL\_IG = p_1 \times \left( \log_2 \frac{p_1}{p_1 + n_1} - \log_2 \frac{p_0}{p_0 + n_0} \right)$<br>
+    （其中 $p_0, n_0$ 为原规则覆盖的正负例数，$p_1, n_1$ 为增加新条件后新规则覆盖的正负例数）</li>
+</ul>
 
-  <section class="exam-priority">
-    <h2>核心重点板块</h2>
-    <p class="weight-note">根据课程内容与重点，梳理以下三大模块集群，明确复习重点。</p>
-    <div class="weight-grid">
-      <div class="weight-card basic">
-        <strong>分类算法</strong>
-        <h3>Classification & Evaluation</h3>
-        <p><span class="module-list">M02 - M07</span><br>核心考察：决策树(Gini/Entropy)、KNN、基于规则、集成学习(Bagging/Boosting)，以及过拟合与评估矩阵(ROC/AUC)。</p>
-      </div>
-      <div class="weight-card calc">
-        <strong>聚类算法</strong>
-        <h3>Cluster Analysis</h3>
-        <p><span class="module-list">M09 - M11</span><br>核心考察：K-Means (优缺点与限制)、层次聚类 (Single/Complete linkage对比) 以及 DBSCAN (核心点/密度可达判别)。</p>
-      </div>
-      <div class="weight-card combined">
-        <strong>数据与模式</strong>
-        <h3>Data Cube & Frequent Pattern</h3>
-        <p><span class="module-list">M08, M12, M13</span><br>核心考察：Apriori 先验性质与剪枝，OLAP (Roll-up/Drill-down)，BUC 自底向上算法与冰山立方体计算。</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="study-paths">
-    <h2>学习路径指南</h2>
-    <div class="paths-grid">
-      <div class="path-card">
-        <h3>路径 A：预测与分类模型</h3>
-        <p class="path-desc">梳理各种分类算法的原理、步骤，以及它们在过拟合和评估矩阵上的比较。</p>
-        <div class="path-chain">
-          <span class="path-step">M03 决策树</span><span class="path-arrow">→</span>
-          <span class="path-step">M04 KNN</span><span class="path-arrow">→</span>
-          <span class="path-step">M05 规则</span><span class="path-arrow">→</span>
-          <span class="path-step">M06 集成</span><span class="path-arrow">→</span>
-          <span class="path-step">M07 评估</span>
-        </div>
-      </div>
-      <div class="path-card">
-        <h3>路径 B：无监督聚类体系</h3>
-        <p class="path-desc">理解聚类的目标，横向对比三种经典算法如何处理不同形状与噪声数据。</p>
-        <div class="path-chain">
-          <span class="path-step">M09 划分/层次</span><span class="path-arrow">→</span>
-          <span class="path-step">M10 DBSCAN</span><span class="path-arrow">→</span>
-          <span class="path-step">M11 聚类评估</span>
-        </div>
-      </div>
-      <div class="path-card">
-        <h3>路径 C：数据结构与频繁项</h3>
-        <p class="path-desc">从事务数据的关联规则提取，到多维数据仓库的 OLAP 和底层 Cube 计算。</p>
-        <div class="path-chain">
-          <span class="path-step">M08 Apriori</span><span class="path-arrow">→</span>
-          <span class="path-step">M12 OLAP</span><span class="path-arrow">→</span>
-          <span class="path-step">M13 BUC算法</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="modules-wrap" id="modules">
-    <div class="modules-head">
-      <h2>15大核心模块</h2>
-      <p>点击卡片进入对应模块的阅读页。</p>
-    </div>
-
-    <!-- Category 1 -->
-    <div class="section-title">I. 基础概念与模型评估</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m01.html\'">
-        <div class="mc-num">MODULE 01</div><span class="mc-badge normal">基础</span>
-        <h3>概述与数据预处理</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m02.html\'">
-        <div class="mc-num">MODULE 02</div><span class="mc-badge star">⭐必考计算</span>
-        <h3>分类模型性能评估</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m07.html\'">
-        <div class="mc-num">MODULE 07</div><span class="mc-badge scope">理论基础</span>
-        <h3>过拟合与模型评估</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 2 -->
-    <div class="section-title">II. 分类与预测算法</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m03.html\'">
-        <div class="mc-num">MODULE 03</div><span class="mc-badge scope">核心算法</span>
-        <h3>决策树</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m04.html\'">
-        <div class="mc-num">MODULE 04</div><span class="mc-badge scope">核心算法</span>
-        <h3>K-近邻学习 (KNN)</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m05.html\'">
-        <div class="mc-num">MODULE 05</div><span class="mc-badge scope">核心算法</span>
-        <h3>基于规则分类</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m06.html\'">
-        <div class="mc-num">MODULE 06</div><span class="mc-badge star">⭐高频考点</span>
-        <h3>集成学习方法</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 3 -->
-    <div class="section-title">III. 无监督聚类分析</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m09.html\'">
-        <div class="mc-num">MODULE 09</div><span class="mc-badge scope">核心算法</span>
-        <h3>划分与层次聚类</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m10.html\'">
-        <div class="mc-num">MODULE 10</div><span class="mc-badge scope">核心算法</span>
-        <h3>基于密度的聚类</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m11.html\'">
-        <div class="mc-num">MODULE 11</div><span class="mc-badge normal">评估指标</span>
-        <h3>聚类分析评估</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 4 -->
-    <div class="section-title">IV. 频繁模式与数据仓库</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m08.html\'">
-        <div class="mc-num">MODULE 08</div><span class="mc-badge star">⭐必考逻辑</span>
-        <h3>频繁模式：Apriori</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m12.html\'">
-        <div class="mc-num">MODULE 12</div><span class="mc-badge scope">体系结构</span>
-        <h3>数据仓库与 OLAP</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m13.html\'">
-        <div class="mc-num">MODULE 13</div><span class="mc-badge star">⭐重点算法</span>
-        <h3>数据立方体计算</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 5 -->
-    <div class="section-title" style="color: var(--orange);">V. 专题复习</div>
-    <div class="modules-grid">
-      <div class="module-card" onclick="window.location.href=\'m14.html\'">
-        <div class="mc-num">MODULE 14</div><span class="mc-badge star">⭐核心专题</span>
-        <h3>计算题专题</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m15.html\'">
-        <div class="mc-num">MODULE 15</div><span class="mc-badge star">⭐核心专题</span>
-        <h3>算法伪代码专题</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-  </section>
-
-  <footer class="footer">
-    <strong>CS5483 Data Warehousing & Data Mining</strong> · Semester B 2025/26<br>
-    本地化完全静态页面 · 期末考试复习指南
-  </footer>
+  </div>
 </div>
 
-
-  <div id="detail-content" class="detail-content"></div>
-</div>
-
-
+<footer class="footer" style="text-align: center; padding: 40px 24px; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; background: #fff;">
+  <strong>CS5483 Data Warehousing & Data Mining</strong> · Semester B 2025/26<br>
+  本地化完全静态页面 · 期末考试复习指南
+</footer>
 
 </body>
 </html>

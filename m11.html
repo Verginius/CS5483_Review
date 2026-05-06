@@ -248,180 +248,77 @@ body {
 <body>
 
 <nav class="topbar">
-  <div class="topbar-brand" onclick="goHome()">
+  <div class="topbar-brand" onclick="window.location.href='index.html'">
     <span class="badge-cs">CS5483</span>
     <span class="topbar-title">Data Warehousing & Data Mining</span>
   </div>
   <span class="topbar-status">15 个模块 · 期末考试导向</span>
 </nav>
 
-<div id="main-view">
-  <header class="hero">
-    <div class="kicker">Final Exam Navigator</div>
-    <h1>CS5483 数据挖掘复习指南</h1>
-    <p class="sub">涵盖分类、聚类、关联规则与数据仓库的核心算法与评估方法</p>
-  </header>
+<div id="detail-view" style="display: block; max-width: 900px; margin: 60px auto 100px; padding: 60px 80px; background: #fff; border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1); position: relative;">
+  <div class="back-nav" style="position: sticky; top: 20px; z-index: 10; margin-bottom: 40px;">
+    <button class="btn-back" onclick="window.location.href='index.html'" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: rgba(255,255,255,0.9); color: var(--ink); border-radius: 999px; font-weight: 700; font-size: 15px; cursor: pointer; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05); backdrop-filter: blur(10px); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      返回复习大厅
+    </button>
+  </div>
+  <div id="detail-content" class="detail-content">
+    
+<h1>MODULE 11: Cluster Analysis Evaluation (聚类评估)</h1>
+<p style="font-size: 14px; color: var(--muted); border-left: 4px solid var(--border); padding-left: 12px; margin-top: -16px; margin-bottom: 32px;">📄 <strong>参考讲义：</strong><code>ClusterAnalysis_EV.pptx</code></p>
+<div class="highlight"><strong>核心考点：</strong>聚类分析的有效性前提、Elbow法则探查簇数量的逻辑、Silhouette轮廓系数评估聚类质量的方法、以及基于外部标签的评估指标。</div>
+<h2>1. 聚类评估的三个层次</h2>
+<p>评估无监督聚类任务面临缺乏 Ground Truth 的挑战，通常包含以下三个层面：</p>
+<ul>
+    <li><strong>Tendency (聚类趋势)</strong>：验证数据集本身是否存在非随机的聚类结构（可通过霍普金斯统计量等方法检验）。若数据仅为均匀分布的随机噪声，则聚类毫无意义。</li>
+    <li><strong>Quantity (簇数量探查)</strong>：确定数据集包含的最优簇数量 $K$。</li>
+    <li><strong>Quality (聚类质量)</strong>：衡量聚类结果是否达到了“簇内相似度高、簇间差异性大”的标准。</li>
+</ul>
+<h2>2. 内在评估指标 (Intrinsic Measures)</h2>
+<p>在缺乏真实标签的情况下，依赖数据内在几何分布进行验证：</p>
+<ul>
+    <li><strong>Elbow Method (肘部法则) 探寻 K 值</strong>：<br>
+    通过绘制误差平方和 (SSE) 随 K 值变化的曲线。当 K 值增大时，SSE 必然递减。<br>
+    如果在某个特定的 K 值处，SSE 的下降幅度由急剧转为平缓，曲线呈现出弯曲的 <strong>“肘部 (Elbow)”</strong>，则认为该点为较优的分类数量。<br>
+    <strong>局限性</strong>：在实际数据中，类间界限往往模糊，曲线平滑无明显拐点，导致此法则难以应用。</li>
+    
+    <li><strong>Silhouette Coefficient (轮廓系数) 评估聚类质量</strong>：<br>
+    考察单一样本点 $i$ 的聚类合理性：<br>
+    1. 计算 $i$ 到其 <strong>所属簇</strong> 内所有其他点的平均距离 $a(i)$，表征内聚度。<br>
+    2. 计算 $i$ 到其他 <strong>相邻簇</strong> 内所有点的平均距离，取其中的最小值 $b(i)$，表征分离度。<br>
+    计算公式：$s(i) = \frac{b(i) - a(i)}{\max(a(i), b(i))}$。<br>
+    <strong>指标解释</strong>：数值范围为 <strong>[-1, 1]</strong>。<br>
+    - 若结果 <strong>接近 1</strong>，表明 $b \gg a$，样本与同簇极近且远分于他簇，聚类质量优异。<br>
+    - 若结果 <strong>接近 0</strong>，表明 $a \approx b$，样本位于两簇边界，归属不明确。<br>
+    - 若结果 <strong>接近 -1</strong>，表明 $a \gg b$，样本距离自身簇反而比距离别簇更远，说明聚类分配错误。</li>
+</ul>
+<h2>3. 外在评估指标 (Extrinsic Measures)</h2>
+<p>当存在已知真实分类标签时，可将其作为基准进行外部评估：</p>
+<ul>
+    <li><strong>B-Cubed 评估法</strong>：<br>
+    针对样本级别的配对精确度：针对某个样本，其所属簇中真实类别与其相同的样本数比例为其 Precision；整体数据集中真实类别相同且被聚入同一簇的样本数比例为其 Recall。计算全员的加权平均得分。</li>
+    <li><strong>Classes to clusters evaluation (类别到簇映射)</strong>：<br>
+    面对聚类算法输出的匿名簇编号（如 Cluster 0, Cluster 1），WEKA 使用贪心算法寻找最优的映射关系，使得预测簇编号与真实类别标签的重合样本数量最大化。<br>
+    完成匹配后，未对齐的样本被视为误分类实例，据此计算等效的 <strong>分类错误率 (Error Rate)</strong>。</li>
+</ul>
+<h3>🎯 经典例题</h3>
+<p><strong>【Q1. 轮廓系数计算题】</strong>在聚类任务中，已知数据点 $x$ 到同簇其它样本的平均距离为 5，到距离其最近的相邻簇中样本的平均距离为 1。请计算此样本的轮廓系数，并判定该点是否被正确聚类。</p>
+<p><strong>【解答】</strong>:<br>
+- 内聚距离 $a=5$，分离距离 $b=1$。<br>
+- 轮廓系数公式：$s(i) = \frac{b(i) - a(i)}{\max(a(i), b(i))} = \frac{1 - 5}{\max(5, 1)} = \frac{-4}{5} = -0.8$<br>
+- <strong>判定</strong>：轮廓系数为 $-0.8$，接近 $-1$。说明该样本与所属簇内的节点差异巨大，反而更贴近其他簇，表明算法在此处做出了严重的错误划分。</p>
+<p><strong>【Q2. 评估机制解析】</strong>使用具备 <code>Real_Labels</code> 的数据集在 WEKA 中运行 K-Means。输出结果显示 <code>Incorrectly clustered instances : 15.0%</code>。WEKA 是如何将无意义的簇编号转化为准确错误率的？</p>
+<p><strong>【解答】</strong>: WEKA 采用了 <strong>Classes to clusters evaluation (类别到簇匹配映射)</strong> 机制。<br>
+在算法输出任意名称的簇别后，WEKA 会尝试所有排列组合，找到使预测簇与真实大类之间重叠对齐样本数最大的最佳映射对应。<br>
+在确定映射关系后，未能正确落入对应真实类别映射圈内的游离样本，即被等效统计为分类错误样本，由此推算出直观的 15.0% 错误率。</p>
 
-  <section class="exam-priority">
-    <h2>核心重点板块</h2>
-    <p class="weight-note">根据课程内容与重点，梳理以下三大模块集群，明确复习重点。</p>
-    <div class="weight-grid">
-      <div class="weight-card basic">
-        <strong>分类算法</strong>
-        <h3>Classification & Evaluation</h3>
-        <p><span class="module-list">M02 - M07</span><br>核心考察：决策树(Gini/Entropy)、KNN、基于规则、集成学习(Bagging/Boosting)，以及过拟合与评估矩阵(ROC/AUC)。</p>
-      </div>
-      <div class="weight-card calc">
-        <strong>聚类算法</strong>
-        <h3>Cluster Analysis</h3>
-        <p><span class="module-list">M09 - M11</span><br>核心考察：K-Means (优缺点与限制)、层次聚类 (Single/Complete linkage对比) 以及 DBSCAN (核心点/密度可达判别)。</p>
-      </div>
-      <div class="weight-card combined">
-        <strong>数据与模式</strong>
-        <h3>Data Cube & Frequent Pattern</h3>
-        <p><span class="module-list">M08, M12, M13</span><br>核心考察：Apriori 先验性质与剪枝，OLAP (Roll-up/Drill-down)，BUC 自底向上算法与冰山立方体计算。</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="study-paths">
-    <h2>学习路径指南</h2>
-    <div class="paths-grid">
-      <div class="path-card">
-        <h3>路径 A：预测与分类模型</h3>
-        <p class="path-desc">梳理各种分类算法的原理、步骤，以及它们在过拟合和评估矩阵上的比较。</p>
-        <div class="path-chain">
-          <span class="path-step">M03 决策树</span><span class="path-arrow">→</span>
-          <span class="path-step">M04 KNN</span><span class="path-arrow">→</span>
-          <span class="path-step">M05 规则</span><span class="path-arrow">→</span>
-          <span class="path-step">M06 集成</span><span class="path-arrow">→</span>
-          <span class="path-step">M07 评估</span>
-        </div>
-      </div>
-      <div class="path-card">
-        <h3>路径 B：无监督聚类体系</h3>
-        <p class="path-desc">理解聚类的目标，横向对比三种经典算法如何处理不同形状与噪声数据。</p>
-        <div class="path-chain">
-          <span class="path-step">M09 划分/层次</span><span class="path-arrow">→</span>
-          <span class="path-step">M10 DBSCAN</span><span class="path-arrow">→</span>
-          <span class="path-step">M11 聚类评估</span>
-        </div>
-      </div>
-      <div class="path-card">
-        <h3>路径 C：数据结构与频繁项</h3>
-        <p class="path-desc">从事务数据的关联规则提取，到多维数据仓库的 OLAP 和底层 Cube 计算。</p>
-        <div class="path-chain">
-          <span class="path-step">M08 Apriori</span><span class="path-arrow">→</span>
-          <span class="path-step">M12 OLAP</span><span class="path-arrow">→</span>
-          <span class="path-step">M13 BUC算法</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="modules-wrap" id="modules">
-    <div class="modules-head">
-      <h2>15大核心模块</h2>
-      <p>点击卡片进入对应模块的阅读页。</p>
-    </div>
-
-    <!-- Category 1 -->
-    <div class="section-title">I. 基础概念与模型评估</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m01.html\'">
-        <div class="mc-num">MODULE 01</div><span class="mc-badge normal">基础</span>
-        <h3>概述与数据预处理</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m02.html\'">
-        <div class="mc-num">MODULE 02</div><span class="mc-badge star">⭐必考计算</span>
-        <h3>分类模型性能评估</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m07.html\'">
-        <div class="mc-num">MODULE 07</div><span class="mc-badge scope">理论基础</span>
-        <h3>过拟合与模型评估</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 2 -->
-    <div class="section-title">II. 分类与预测算法</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m03.html\'">
-        <div class="mc-num">MODULE 03</div><span class="mc-badge scope">核心算法</span>
-        <h3>决策树</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m04.html\'">
-        <div class="mc-num">MODULE 04</div><span class="mc-badge scope">核心算法</span>
-        <h3>K-近邻学习 (KNN)</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m05.html\'">
-        <div class="mc-num">MODULE 05</div><span class="mc-badge scope">核心算法</span>
-        <h3>基于规则分类</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m06.html\'">
-        <div class="mc-num">MODULE 06</div><span class="mc-badge star">⭐高频考点</span>
-        <h3>集成学习方法</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 3 -->
-    <div class="section-title">III. 无监督聚类分析</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m09.html\'">
-        <div class="mc-num">MODULE 09</div><span class="mc-badge scope">核心算法</span>
-        <h3>划分与层次聚类</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m10.html\'">
-        <div class="mc-num">MODULE 10</div><span class="mc-badge scope">核心算法</span>
-        <h3>基于密度的聚类</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m11.html\'">
-        <div class="mc-num">MODULE 11</div><span class="mc-badge normal">评估指标</span>
-        <h3>聚类分析评估</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 4 -->
-    <div class="section-title">IV. 频繁模式与数据仓库</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m08.html\'">
-        <div class="mc-num">MODULE 08</div><span class="mc-badge star">⭐必考逻辑</span>
-        <h3>频繁模式：Apriori</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m12.html\'">
-        <div class="mc-num">MODULE 12</div><span class="mc-badge scope">体系结构</span>
-        <h3>数据仓库与 OLAP</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m13.html\'">
-        <div class="mc-num">MODULE 13</div><span class="mc-badge star">⭐重点算法</span>
-        <h3>数据立方体计算</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 5 -->
-    <div class="section-title" style="color: var(--orange);">V. 专题复习</div>
-    <div class="modules-grid">
-      <div class="module-card" onclick="window.location.href=\'m14.html\'">
-        <div class="mc-num">MODULE 14</div><span class="mc-badge star">⭐核心专题</span>
-        <h3>计算题专题</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m15.html\'">
-        <div class="mc-num">MODULE 15</div><span class="mc-badge star">⭐核心专题</span>
-        <h3>算法伪代码专题</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-  </section>
-
-  <footer class="footer">
-    <strong>CS5483 Data Warehousing & Data Mining</strong> · Semester B 2025/26<br>
-    本地化完全静态页面 · 期末考试复习指南
-  </footer>
+  </div>
 </div>
 
-
-  <div id="detail-content" class="detail-content"></div>
-</div>
-
-
+<footer class="footer" style="text-align: center; padding: 40px 24px; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; background: #fff;">
+  <strong>CS5483 Data Warehousing & Data Mining</strong> · Semester B 2025/26<br>
+  本地化完全静态页面 · 期末考试复习指南
+</footer>
 
 </body>
 </html>

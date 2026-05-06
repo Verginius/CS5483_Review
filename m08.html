@@ -248,180 +248,77 @@ body {
 <body>
 
 <nav class="topbar">
-  <div class="topbar-brand" onclick="goHome()">
+  <div class="topbar-brand" onclick="window.location.href='index.html'">
     <span class="badge-cs">CS5483</span>
     <span class="topbar-title">Data Warehousing & Data Mining</span>
   </div>
   <span class="topbar-status">15 个模块 · 期末考试导向</span>
 </nav>
 
-<div id="main-view">
-  <header class="hero">
-    <div class="kicker">Final Exam Navigator</div>
-    <h1>CS5483 数据挖掘复习指南</h1>
-    <p class="sub">涵盖分类、聚类、关联规则与数据仓库的核心算法与评估方法</p>
-  </header>
+<div id="detail-view" style="display: block; max-width: 900px; margin: 60px auto 100px; padding: 60px 80px; background: #fff; border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1); position: relative;">
+  <div class="back-nav" style="position: sticky; top: 20px; z-index: 10; margin-bottom: 40px;">
+    <button class="btn-back" onclick="window.location.href='index.html'" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: rgba(255,255,255,0.9); color: var(--ink); border-radius: 999px; font-weight: 700; font-size: 15px; cursor: pointer; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05); backdrop-filter: blur(10px); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      返回复习大厅
+    </button>
+  </div>
+  <div id="detail-content" class="detail-content">
+    
+<h1>MODULE 08: Frequent Pattern Analysis (Apriori Algorithm)</h1>
+<p style="font-size: 14px; color: var(--muted); border-left: 4px solid var(--border); padding-left: 12px; margin-top: -16px; margin-bottom: 32px;">📄 <strong>参考讲义：</strong><code>FrequentPatternAnalysis_AP.pptx</code></p>
+<div class="highlight"><strong>核心考点：</strong>支持度与置信度的逻辑、Apriori 反单调性及候选生成与剪枝机制、极大项集与闭合项集概念、Lift 提升度的作用。</div>
+<h2>1. 市场篮子分析 (Market Basket Analysis)</h2>
+<p>这是一种经典的无监督模式挖掘方法，旨在从交易记录 (Transaction Databases) 中找出 <strong>频繁且同时出现</strong> 的物品组合，常用于零售优化与推荐系统。</p>
+<ul>
+    <li><strong>Support (支持度)</strong>：项集 $X$ 在所有交易记录中出现的概率，反映组合的频繁程度：$Support(X) = \frac{Count(X)}{Total\ Transactions}$。</li>
+    <li><strong>Confidence (置信度)</strong>：条件概率 $P(Y|X)$，即包含 $X$ 的交易中同时包含 $Y$ 的比例：$Confidence(X \Rightarrow Y) = \frac{Support(X \cup Y)}{Support(X)}$。用于生成关联规则。</li>
+</ul>
+<h2>2. Apriori 核心原理：反单调性 (Anti-monotone)</h2>
+<p>为了应对组合爆炸问题，算法引入了 <strong>Apriori 先验性质 (反单调性)</strong>：<br>
+<strong>定理：一个频繁项集的所有非空子集也必须是频繁的。</strong><br>
+<strong>剪枝推论</strong>：如果某一项集不满足最小支持度（即非频繁），则任何包含该项集的超集也必定非频繁，因此可将其从候选搜索空间中直接剔除。</p>
 
-  <section class="exam-priority">
-    <h2>核心重点板块</h2>
-    <p class="weight-note">根据课程内容与重点，梳理以下三大模块集群，明确复习重点。</p>
-    <div class="weight-grid">
-      <div class="weight-card basic">
-        <strong>分类算法</strong>
-        <h3>Classification & Evaluation</h3>
-        <p><span class="module-list">M02 - M07</span><br>核心考察：决策树(Gini/Entropy)、KNN、基于规则、集成学习(Bagging/Boosting)，以及过拟合与评估矩阵(ROC/AUC)。</p>
-      </div>
-      <div class="weight-card calc">
-        <strong>聚类算法</strong>
-        <h3>Cluster Analysis</h3>
-        <p><span class="module-list">M09 - M11</span><br>核心考察：K-Means (优缺点与限制)、层次聚类 (Single/Complete linkage对比) 以及 DBSCAN (核心点/密度可达判别)。</p>
-      </div>
-      <div class="weight-card combined">
-        <strong>数据与模式</strong>
-        <h3>Data Cube & Frequent Pattern</h3>
-        <p><span class="module-list">M08, M12, M13</span><br>核心考察：Apriori 先验性质与剪枝，OLAP (Roll-up/Drill-down)，BUC 自底向上算法与冰山立方体计算。</p>
-      </div>
-    </div>
-  </section>
+<h2>3. Apriori 算法流程</h2>
+<p>Apriori 算法通过逐层迭代发掘频繁项集：</p>
+<p><strong>输入：</strong>交易记录数据库；最小支持度阈值 <code>Min_Support</code>。<br>
+<strong>输出：</strong>所有满足支持度阈值的频繁项集。</p>
+<ol>
+    <li><strong>[扫描数据库]</strong>：统计所有单一商品的频率，剔除不满足 <code>Min_Support</code> 的项，生成 <strong>频繁 1-项集 ($L_1$)</strong>。</li>
+    <li><strong>[候选生成]</strong>：通过上一代的频繁集 $L_{k-1}$ 相互拼接，生成高一维度的 <strong>候选集 $C_k$</strong>。</li>
+    <li><strong>[剪枝策略]</strong>：检查 $C_k$ 中每个候选集的所有 $(k-1)$ 级子集，如果发现有子集不在 $L_{k-1}$ 中，根据反单调性，立刻将该候选集从 $C_k$ 中删除。</li>
+    <li><strong>[支持度验证]</strong>：对剪枝后剩余的 $C_k$ 候选项，再次扫描数据库计算实际支持度，满足阈值的项集成为 <strong>$L_k$</strong>。</li>
+    <li><strong>[循环迭代]</strong>：重复步骤 2 至 4，直到无法生成新的频繁项集。</li>
+</ol>
 
-  <section class="study-paths">
-    <h2>学习路径指南</h2>
-    <div class="paths-grid">
-      <div class="path-card">
-        <h3>路径 A：预测与分类模型</h3>
-        <p class="path-desc">梳理各种分类算法的原理、步骤，以及它们在过拟合和评估矩阵上的比较。</p>
-        <div class="path-chain">
-          <span class="path-step">M03 决策树</span><span class="path-arrow">→</span>
-          <span class="path-step">M04 KNN</span><span class="path-arrow">→</span>
-          <span class="path-step">M05 规则</span><span class="path-arrow">→</span>
-          <span class="path-step">M06 集成</span><span class="path-arrow">→</span>
-          <span class="path-step">M07 评估</span>
-        </div>
-      </div>
-      <div class="path-card">
-        <h3>路径 B：无监督聚类体系</h3>
-        <p class="path-desc">理解聚类的目标，横向对比三种经典算法如何处理不同形状与噪声数据。</p>
-        <div class="path-chain">
-          <span class="path-step">M09 划分/层次</span><span class="path-arrow">→</span>
-          <span class="path-step">M10 DBSCAN</span><span class="path-arrow">→</span>
-          <span class="path-step">M11 聚类评估</span>
-        </div>
-      </div>
-      <div class="path-card">
-        <h3>路径 C：数据结构与频繁项</h3>
-        <p class="path-desc">从事务数据的关联规则提取，到多维数据仓库的 OLAP 和底层 Cube 计算。</p>
-        <div class="path-chain">
-          <span class="path-step">M08 Apriori</span><span class="path-arrow">→</span>
-          <span class="path-step">M12 OLAP</span><span class="path-arrow">→</span>
-          <span class="path-step">M13 BUC算法</span>
-        </div>
-      </div>
-    </div>
-  </section>
+<h2>4. 项集的存储与压缩技术 (Maximal & Closed)</h2>
+<p>为了解决高维频繁模式导致子集呈指数级增长的存储问题，通常采用以下压缩表示：</p>
+<ul>
+    <li><strong>极大频繁项集 (Maximal frequent itemsets)</strong>：自身是频繁的，且没有任何真超集 (proper superset) 是频繁的。它隐含了其所有子集均频繁的信息。</li>
+    <li><strong>闭合项集 (Closed Patterns)</strong>：自身是频繁的，且不存在与它拥有 <strong>相同支持度计数 (count)</strong> 的真超集。它在压缩数据的同时，保留了所有子集的确切支持度信息。</li>
+</ul>
+<h2>5. 规则评估：Confidence 的局限与 Lift</h2>
+<p>高 Confidence 可能产生统计学上的误导。<br>
+例如：规则 <code>玩游戏 -> 买手机</code> 置信度达 90%。但如果人群中购买手机的基础概率本身就是 95%，这说明“玩游戏”实际上降低了买手机的概率，高置信度为虚假的正相关。<br>
+为识别真实的关联，需引入 <strong>Lift (提升度)</strong>：$Lift(X, Y) = \frac{P(X \cup Y)}{P(X) \times P(Y)}$。只有当 $Lift > 1$ 时，才表明 $X$ 对 $Y$ 具有实质的正向促进作用。</p>
 
-  <section class="modules-wrap" id="modules">
-    <div class="modules-head">
-      <h2>15大核心模块</h2>
-      <p>点击卡片进入对应模块的阅读页。</p>
-    </div>
+<h3>🎯 经典例题</h3>
+<p><strong>【Q1. 指标计算题】</strong>在拥有 100 条记录的数据库中，单买面包的记录有 40 条，单买黄油的有 50 条，两者同时购买的有 30 条。<br>
+请计算规则 <code>{面包} -> {黄油}</code> 的 Support, Confidence，并计算 Lift 以说明这是否是一条有效的正向关联规则。</p>
+<p><strong>【解答】</strong>:<br>
+- <strong>Support</strong> = $\frac{30}{100} = 30\%$<br>
+- <strong>Confidence</strong> = $\frac{Support(面包 \cup 黄油)}{Support(面包)} = \frac{30}{40} = 75\%$。<br>
+- <strong>Lift (提升度)</strong> = $\frac{P(面包 \cup 黄油)}{P(面包) \times P(黄油)} = \frac{0.3}{0.4 \times 0.5} = 1.5$。<br>
+- 结论：因为 <strong>Lift = 1.5 > 1</strong>，表明购买面包对购买黄油有显著的正向促进作用，为有效关联规则。</p>
+<p><strong>【Q2. 剪枝策略填空题】</strong>在 Apriori 算法生成候选集 $C_3 = \{苹果, 橙子, 香蕉\}$ 时，系统会检查其所有的 2 维子集：$\_{______}\_$，$\_{______}\_$，$\_{______}\_$。若发现有任何子集未出现在 $L_2$ 中，则会将其剪枝。这利用了算法的 $\_{______}\_$ 性质。</p>
+<p><strong>【解答】</strong>: 填入 <code>{苹果, 橙子}</code>、<code>{苹果, 香蕉}</code>、<code>{橙子, 香蕉}</code>。该机制基于 <code>Anti-monotone (反单调性)</code> 性质：频繁项集的所有子集必须频繁。</p>
 
-    <!-- Category 1 -->
-    <div class="section-title">I. 基础概念与模型评估</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m01.html\'">
-        <div class="mc-num">MODULE 01</div><span class="mc-badge normal">基础</span>
-        <h3>概述与数据预处理</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m02.html\'">
-        <div class="mc-num">MODULE 02</div><span class="mc-badge star">⭐必考计算</span>
-        <h3>分类模型性能评估</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m07.html\'">
-        <div class="mc-num">MODULE 07</div><span class="mc-badge scope">理论基础</span>
-        <h3>过拟合与模型评估</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 2 -->
-    <div class="section-title">II. 分类与预测算法</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m03.html\'">
-        <div class="mc-num">MODULE 03</div><span class="mc-badge scope">核心算法</span>
-        <h3>决策树</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m04.html\'">
-        <div class="mc-num">MODULE 04</div><span class="mc-badge scope">核心算法</span>
-        <h3>K-近邻学习 (KNN)</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m05.html\'">
-        <div class="mc-num">MODULE 05</div><span class="mc-badge scope">核心算法</span>
-        <h3>基于规则分类</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m06.html\'">
-        <div class="mc-num">MODULE 06</div><span class="mc-badge star">⭐高频考点</span>
-        <h3>集成学习方法</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 3 -->
-    <div class="section-title">III. 无监督聚类分析</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m09.html\'">
-        <div class="mc-num">MODULE 09</div><span class="mc-badge scope">核心算法</span>
-        <h3>划分与层次聚类</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m10.html\'">
-        <div class="mc-num">MODULE 10</div><span class="mc-badge scope">核心算法</span>
-        <h3>基于密度的聚类</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m11.html\'">
-        <div class="mc-num">MODULE 11</div><span class="mc-badge normal">评估指标</span>
-        <h3>聚类分析评估</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 4 -->
-    <div class="section-title">IV. 频繁模式与数据仓库</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m08.html\'">
-        <div class="mc-num">MODULE 08</div><span class="mc-badge star">⭐必考逻辑</span>
-        <h3>频繁模式：Apriori</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m12.html\'">
-        <div class="mc-num">MODULE 12</div><span class="mc-badge scope">体系结构</span>
-        <h3>数据仓库与 OLAP</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m13.html\'">
-        <div class="mc-num">MODULE 13</div><span class="mc-badge star">⭐重点算法</span>
-        <h3>数据立方体计算</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 5 -->
-    <div class="section-title" style="color: var(--orange);">V. 专题复习</div>
-    <div class="modules-grid">
-      <div class="module-card" onclick="window.location.href=\'m14.html\'">
-        <div class="mc-num">MODULE 14</div><span class="mc-badge star">⭐核心专题</span>
-        <h3>计算题专题</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m15.html\'">
-        <div class="mc-num">MODULE 15</div><span class="mc-badge star">⭐核心专题</span>
-        <h3>算法伪代码专题</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-  </section>
-
-  <footer class="footer">
-    <strong>CS5483 Data Warehousing & Data Mining</strong> · Semester B 2025/26<br>
-    本地化完全静态页面 · 期末考试复习指南
-  </footer>
+  </div>
 </div>
 
-
-  <div id="detail-content" class="detail-content"></div>
-</div>
-
-
+<footer class="footer" style="text-align: center; padding: 40px 24px; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; background: #fff;">
+  <strong>CS5483 Data Warehousing & Data Mining</strong> · Semester B 2025/26<br>
+  本地化完全静态页面 · 期末考试复习指南
+</footer>
 
 </body>
 </html>

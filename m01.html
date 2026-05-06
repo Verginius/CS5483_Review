@@ -248,180 +248,97 @@ body {
 <body>
 
 <nav class="topbar">
-  <div class="topbar-brand" onclick="goHome()">
+  <div class="topbar-brand" onclick="window.location.href='index.html'">
     <span class="badge-cs">CS5483</span>
     <span class="topbar-title">Data Warehousing & Data Mining</span>
   </div>
   <span class="topbar-status">15 个模块 · 期末考试导向</span>
 </nav>
 
-<div id="main-view">
-  <header class="hero">
-    <div class="kicker">Final Exam Navigator</div>
-    <h1>CS5483 数据挖掘复习指南</h1>
-    <p class="sub">涵盖分类、聚类、关联规则与数据仓库的核心算法与评估方法</p>
-  </header>
+<div id="detail-view" style="display: block; max-width: 900px; margin: 60px auto 100px; padding: 60px 80px; background: #fff; border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1); position: relative;">
+  <div class="back-nav" style="position: sticky; top: 20px; z-index: 10; margin-bottom: 40px;">
+    <button class="btn-back" onclick="window.location.href='index.html'" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: rgba(255,255,255,0.9); color: var(--ink); border-radius: 999px; font-weight: 700; font-size: 15px; cursor: pointer; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05); backdrop-filter: blur(10px); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      返回复习大厅
+    </button>
+  </div>
+  <div id="detail-content" class="detail-content">
+    
+<h1>MODULE 01: 概述与数据预处理</h1>
+<p style="font-size: 14px; color: var(--muted); border-left: 4px solid var(--border); padding-left: 12px; margin-top: -16px; margin-bottom: 32px;">📄 <strong>参考讲义：</strong><code>Overview.pptx</code></p>
+<div class="highlight"><strong>核心考点：</strong>KDD流程全貌、数据特征类型的具体分类、缺失值与冗余特征处理方法、距离与相似度度量分析。</div>
+<h2>1. 什么是数据挖掘与知识发现 (KDD)?</h2>
+<p>数据挖掘 (Data Mining) 是知识发现 (Knowledge Discovery from Databases, KDD) 过程中最为核心的一环。完整的 KDD 包含以下 <strong>4 个核心步骤</strong>：</p>
+<ol>
+    <li><strong>Preparation (准备阶段)</strong>
+        <ul>
+            <li>设定挖掘目标（确定需要学习和发现的内容）。</li>
+        </ul>
+    </li>
+    <li><strong>Pre-processing (数据预处理阶段)</strong>
+        <ul>
+            <li>数据清洗/数据集成 (Data cleaning/integration)：处理噪声、错误数据并填补缺失值。</li>
+            <li>数据选择/归约/转换/离散化 (Data selection/reduction/transformation/discretization)：筛选相关样本与变量，构建用于挖掘的目标数据集。</li>
+        </ul>
+    </li>
+    <li><strong>Data mining (数据挖掘阶段)</strong>
+        <ul>
+            <li>应用具体的机器学习算法，从预处理好的数据中提取出期望的模式 (patterns)。</li>
+        </ul>
+    </li>
+    <li><strong>Interpretation (解释与部署阶段)</strong>
+        <ul>
+            <li>如果评估结果不理想，则返回前序步骤进行迭代 (Iterate)。</li>
+            <li>如果结果符合预期，则执行部署 (Deploy)：包括生成报告、系统整合及落地应用。</li>
+        </ul>
+    </li>
+</ol>
+<h2>2. 数据集与属性的类型剖析</h2>
+<p>在 WEKA 的 ARFF 文件格式中，属性类型的设定十分严格，算法的表现依赖特征的数据类型：</p>
+<ul>
+    <li><strong>Nominal / Categorical (标称型 / 类别型)</strong>：如天气（晴、阴、雨）。在 WEKA 中表示为 <code>{Sunny, Overcast, Rainy}</code>。此类数据无大小顺序，不能进行代数运算。多数关联规则算法（如 Apriori）要求数据必须为标称型。</li>
+    <li><strong>Ordinal (序数型)</strong>：如满意度（高、中、低）。具有明确顺序，但间隔无数学意义。在算法处理时可转化为数值或标称形式。</li>
+    <li><strong>Numeric / Continuous (数值型 / 连续型)</strong>：包含区间型 (Interval) 和比率型 (Ratio，有绝对零点)。可计算均值和方差，是 KNN 等算法计算欧氏距离的基础类型。在 WEKA 中用 <code>numeric</code> 表示。</li>
+</ul>
 
-  <section class="exam-priority">
-    <h2>核心重点板块</h2>
-    <p class="weight-note">根据课程内容与重点，梳理以下三大模块集群，明确复习重点。</p>
-    <div class="weight-grid">
-      <div class="weight-card basic">
-        <strong>分类算法</strong>
-        <h3>Classification & Evaluation</h3>
-        <p><span class="module-list">M02 - M07</span><br>核心考察：决策树(Gini/Entropy)、KNN、基于规则、集成学习(Bagging/Boosting)，以及过拟合与评估矩阵(ROC/AUC)。</p>
-      </div>
-      <div class="weight-card calc">
-        <strong>聚类算法</strong>
-        <h3>Cluster Analysis</h3>
-        <p><span class="module-list">M09 - M11</span><br>核心考察：K-Means (优缺点与限制)、层次聚类 (Single/Complete linkage对比) 以及 DBSCAN (核心点/密度可达判别)。</p>
-      </div>
-      <div class="weight-card combined">
-        <strong>数据与模式</strong>
-        <h3>Data Cube & Frequent Pattern</h3>
-        <p><span class="module-list">M08, M12, M13</span><br>核心考察：Apriori 先验性质与剪枝，OLAP (Roll-up/Drill-down)，BUC 自底向上算法与冰山立方体计算。</p>
-      </div>
-    </div>
-  </section>
+<h2>3. WEKA 数据预处理核心算法流程</h2>
+<p><strong>ReplaceMissingValues 过滤器执行流程:</strong></p>
+<p><strong>输入：</strong>包含缺失值的数据集。<br>
+<strong>输出：</strong>填补了缺失值的完整数据集。</p>
+<ol>
+    <li><strong>[扫描特征]</strong>：扫描数据集中的每一列特征属性。</li>
+    <li><strong>[处理数值型]</strong>：如果该列为 <strong>Numeric (数值型)</strong>，计算该列所有非缺失样本的 <strong>均值 (Mean)</strong>，将所有缺失的 <code>?</code> 替换为均值。</li>
+    <li><strong>[处理标称型]</strong>：如果该列为 <strong>Nominal (标称型)</strong>，统计该列各种分类的出现频次，找出 <strong>众数 (Mode)</strong>，将所有缺失的 <code>?</code> 替换为众数。</li>
+    <li><strong>[利用类标签优化]</strong>：如果数据集包含类别标签 (Class Label)，该过滤器可选择是否针对每个类别的内部独立计算均值/众数，从而提高填补的精确度。</li>
+</ol>
 
-  <section class="study-paths">
-    <h2>学习路径指南</h2>
-    <div class="paths-grid">
-      <div class="path-card">
-        <h3>路径 A：预测与分类模型</h3>
-        <p class="path-desc">梳理各种分类算法的原理、步骤，以及它们在过拟合和评估矩阵上的比较。</p>
-        <div class="path-chain">
-          <span class="path-step">M03 决策树</span><span class="path-arrow">→</span>
-          <span class="path-step">M04 KNN</span><span class="path-arrow">→</span>
-          <span class="path-step">M05 规则</span><span class="path-arrow">→</span>
-          <span class="path-step">M06 集成</span><span class="path-arrow">→</span>
-          <span class="path-step">M07 评估</span>
-        </div>
-      </div>
-      <div class="path-card">
-        <h3>路径 B：无监督聚类体系</h3>
-        <p class="path-desc">理解聚类的目标，横向对比三种经典算法如何处理不同形状与噪声数据。</p>
-        <div class="path-chain">
-          <span class="path-step">M09 划分/层次</span><span class="path-arrow">→</span>
-          <span class="path-step">M10 DBSCAN</span><span class="path-arrow">→</span>
-          <span class="path-step">M11 聚类评估</span>
-        </div>
-      </div>
-      <div class="path-card">
-        <h3>路径 C：数据结构与频繁项</h3>
-        <p class="path-desc">从事务数据的关联规则提取，到多维数据仓库的 OLAP 和底层 Cube 计算。</p>
-        <div class="path-chain">
-          <span class="path-step">M08 Apriori</span><span class="path-arrow">→</span>
-          <span class="path-step">M12 OLAP</span><span class="path-arrow">→</span>
-          <span class="path-step">M13 BUC算法</span>
-        </div>
-      </div>
-    </div>
-  </section>
+<h2>4. 距离与相似度度量详解</h2>
+<p>数据点之间的接近程度是基于实例学习（如 KNN、K-Means 聚类）的核心：</p>
+<ul>
+    <li><strong>Minkowski Distance (闵可夫斯基距离)</strong>：广义距离公式 $L_p$ 范数。<br>
+        - 当 $p=1$ 时，退化为 <strong>Manhattan (曼哈顿距离)</strong>，计算绝对轴距和：$d(x, y) = \sum_{i=1}^n |x_i - y_i|$。<br>
+        - 当 $p=2$ 时，退化为 <strong>Euclidean (欧氏距离)</strong>，最常用于连续型特征，但对大数值敏感：$d(x, y) = \sqrt{\sum_{i=1}^n (x_i - y_i)^2}$。<br>
+        - 当 $p \rightarrow \infty$ 时，为 <strong>Supremum / Chebyshev 距离</strong>（切比雪夫距离）：$d(x, y) = \max_i |x_i - y_i|$。
+    </li>
+    <li><strong>Cosine Similarity (余弦相似度)</strong>：常用于高维稀疏数据（如文本向量），测量向量夹角，忽略数值的绝对大小，关注方向的匹配度：$\cos(\theta) = \frac{A \cdot B}{\|A\| \|B\|}$。</li>
+    <li><strong>Jaccard Coefficient (雅卡尔系数)</strong>：适用于非对称的二元布尔属性（例如顾客是否购买了某件商品），忽略双 0 匹配，公式为 $J(A, B) = \frac{|A \cap B|}{|A \cup B|}$。</li>
+</ul>
+<h3>🎯 经典例题</h3>
+<p><strong>【Q1. 简答题】</strong>请列举出完整的 KDD (Knowledge Discovery from Databases) 过程所包含的 4 个核心步骤，并指明哪一个大步骤包含了 Deploy (部署)？</p>
+<p><strong>【解答】</strong>: 完整的 KDD 步骤包含 4 大阶段：<br>1. Preparation (准备)<br>2. Pre-processing (预处理)<br>3. Data mining (数据挖掘)<br>4. Interpretation (解释与部署)<br>其中，部署 (Deploy) 属于第四个核心阶段 <strong>Interpretation (解释)</strong>。</p>
+<p><strong>【Q2. 计算题】</strong>给出两个向量 $X = (1, 3)$ 和 $Y = (4, 7)$，请分别计算它们之间的曼哈顿距离、欧氏距离和切比雪夫距离。</p>
+<p><strong>【解答】</strong>:<br>
+- 曼哈顿距离 ($L_1$): $|1-4| + |3-7| = 3 + 4 = 7$<br>
+- 欧氏距离 ($L_2$): $\sqrt{(1-4)^2 + (3-7)^2} = \sqrt{9+16} = 5$<br>
+- 切比雪夫距离 ($L_\infty$): $\max(|1-4|, |3-7|) = \max(3, 4) = 4$</p>
 
-  <section class="modules-wrap" id="modules">
-    <div class="modules-head">
-      <h2>15大核心模块</h2>
-      <p>点击卡片进入对应模块的阅读页。</p>
-    </div>
-
-    <!-- Category 1 -->
-    <div class="section-title">I. 基础概念与模型评估</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m01.html\'">
-        <div class="mc-num">MODULE 01</div><span class="mc-badge normal">基础</span>
-        <h3>概述与数据预处理</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m02.html\'">
-        <div class="mc-num">MODULE 02</div><span class="mc-badge star">⭐必考计算</span>
-        <h3>分类模型性能评估</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m07.html\'">
-        <div class="mc-num">MODULE 07</div><span class="mc-badge scope">理论基础</span>
-        <h3>过拟合与模型评估</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 2 -->
-    <div class="section-title">II. 分类与预测算法</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m03.html\'">
-        <div class="mc-num">MODULE 03</div><span class="mc-badge scope">核心算法</span>
-        <h3>决策树</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m04.html\'">
-        <div class="mc-num">MODULE 04</div><span class="mc-badge scope">核心算法</span>
-        <h3>K-近邻学习 (KNN)</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m05.html\'">
-        <div class="mc-num">MODULE 05</div><span class="mc-badge scope">核心算法</span>
-        <h3>基于规则分类</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m06.html\'">
-        <div class="mc-num">MODULE 06</div><span class="mc-badge star">⭐高频考点</span>
-        <h3>集成学习方法</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 3 -->
-    <div class="section-title">III. 无监督聚类分析</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m09.html\'">
-        <div class="mc-num">MODULE 09</div><span class="mc-badge scope">核心算法</span>
-        <h3>划分与层次聚类</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m10.html\'">
-        <div class="mc-num">MODULE 10</div><span class="mc-badge scope">核心算法</span>
-        <h3>基于密度的聚类</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m11.html\'">
-        <div class="mc-num">MODULE 11</div><span class="mc-badge normal">评估指标</span>
-        <h3>聚类分析评估</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 4 -->
-    <div class="section-title">IV. 频繁模式与数据仓库</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m08.html\'">
-        <div class="mc-num">MODULE 08</div><span class="mc-badge star">⭐必考逻辑</span>
-        <h3>频繁模式：Apriori</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m12.html\'">
-        <div class="mc-num">MODULE 12</div><span class="mc-badge scope">体系结构</span>
-        <h3>数据仓库与 OLAP</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m13.html\'">
-        <div class="mc-num">MODULE 13</div><span class="mc-badge star">⭐重点算法</span>
-        <h3>数据立方体计算</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 5 -->
-    <div class="section-title" style="color: var(--orange);">V. 专题复习</div>
-    <div class="modules-grid">
-      <div class="module-card" onclick="window.location.href=\'m14.html\'">
-        <div class="mc-num">MODULE 14</div><span class="mc-badge star">⭐核心专题</span>
-        <h3>计算题专题</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m15.html\'">
-        <div class="mc-num">MODULE 15</div><span class="mc-badge star">⭐核心专题</span>
-        <h3>算法伪代码专题</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-  </section>
-
-  <footer class="footer">
-    <strong>CS5483 Data Warehousing & Data Mining</strong> · Semester B 2025/26<br>
-    本地化完全静态页面 · 期末考试复习指南
-  </footer>
+  </div>
 </div>
 
-
-  <div id="detail-content" class="detail-content"></div>
-</div>
-
-
+<footer class="footer" style="text-align: center; padding: 40px 24px; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; background: #fff;">
+  <strong>CS5483 Data Warehousing & Data Mining</strong> · Semester B 2025/26<br>
+  本地化完全静态页面 · 期末考试复习指南
+</footer>
 
 </body>
 </html>

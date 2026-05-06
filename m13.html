@@ -248,180 +248,72 @@ body {
 <body>
 
 <nav class="topbar">
-  <div class="topbar-brand" onclick="goHome()">
+  <div class="topbar-brand" onclick="window.location.href='index.html'">
     <span class="badge-cs">CS5483</span>
     <span class="topbar-title">Data Warehousing & Data Mining</span>
   </div>
   <span class="topbar-status">15 个模块 · 期末考试导向</span>
 </nav>
 
-<div id="main-view">
-  <header class="hero">
-    <div class="kicker">Final Exam Navigator</div>
-    <h1>CS5483 数据挖掘复习指南</h1>
-    <p class="sub">涵盖分类、聚类、关联规则与数据仓库的核心算法与评估方法</p>
-  </header>
+<div id="detail-view" style="display: block; max-width: 900px; margin: 60px auto 100px; padding: 60px 80px; background: #fff; border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1); position: relative;">
+  <div class="back-nav" style="position: sticky; top: 20px; z-index: 10; margin-bottom: 40px;">
+    <button class="btn-back" onclick="window.location.href='index.html'" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: rgba(255,255,255,0.9); color: var(--ink); border-radius: 999px; font-weight: 700; font-size: 15px; cursor: pointer; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05); backdrop-filter: blur(10px); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      返回复习大厅
+    </button>
+  </div>
+  <div id="detail-content" class="detail-content">
+    
+<h1>MODULE 13: Data Cube Computation (数据立方体计算)</h1>
+<p style="font-size: 14px; color: var(--muted); border-left: 4px solid var(--border); padding-left: 12px; margin-top: -16px; margin-bottom: 32px;">📄 <strong>参考讲义：</strong><code>DataCubeComputation_BUC.pptx</code> & <code>DataCubeComputation_CCIC.pptx</code></p>
+<div class="highlight"><strong>核心考点：</strong>聚合函数性质分类、维数组合导致状态爆炸及 Iceberg Cube 机制，BUC 算法如何利用先验单调性执行自顶向下计算并进行底层剪枝。</div>
+<h2>1. 聚集函数 (Aggregate Functions) 的计算性质</h2>
+<p>在底层数据聚合推导高层指标时，聚合函数展现出不同的数学性质：</p>
+<ul>
+    <li><strong>Distributive (分配型)</strong>：<br>
+    包含 <code>Count</code>, <code>Sum</code>, <code>Min</code>, <code>Max</code>。该类型函数能够直接利用子节点的聚合结果再次聚合，推导出父节点值（例如将几个城市的总销售额相加得出全省总额），计算效率极高。</li>
+    <li><strong>Algebraic (代数型)</strong>：<br>
+    如 <code>Average</code>。不能直接对子节点均值进行再平均，必须借助多个分配型指标（如保存各自的 <code>Sum</code> 和 <code>Count</code>）通过代数运算 $\frac{\sum Sum_i}{\sum Count_i}$ 进行还原计算。</li>
+    <li><strong>Holistic (整体型)</strong>：<br>
+    如 <code>Median (中位数)</code>、<code>Mode (众数)</code>、<code>Rank</code>。子节点的聚合值无法用于推导父节点值，求全局中位数必须重新加载全局的底层原始记录重新排序，对算力消耗极大。</li>
+</ul>
+<h2>2. 维度诅咒与 Iceberg Cube (冰山立方体)</h2>
+<p>对于高维稀疏数据集，构建完整的 Data Cube 会导致子节点数量呈 $2^N$ 指数爆炸。然而，许多细碎条件组合产生的数据记录数 $Count \le 1$，不具备统计分析意义。<br>
+<strong>Iceberg Cube (冰山立方体)</strong> 机制通过设置 <strong>Iceberg condition (阈值限制，通常为 Min_Support 频次门槛)</strong>，强制规定只有满足频率要求的高价值组合节点才会被计算与存储。低于阈值的长尾组合被视作冰山下的部分予以舍弃，大幅度削减计算量。</p>
 
-  <section class="exam-priority">
-    <h2>核心重点板块</h2>
-    <p class="weight-note">根据课程内容与重点，梳理以下三大模块集群，明确复习重点。</p>
-    <div class="weight-grid">
-      <div class="weight-card basic">
-        <strong>分类算法</strong>
-        <h3>Classification & Evaluation</h3>
-        <p><span class="module-list">M02 - M07</span><br>核心考察：决策树(Gini/Entropy)、KNN、基于规则、集成学习(Bagging/Boosting)，以及过拟合与评估矩阵(ROC/AUC)。</p>
-      </div>
-      <div class="weight-card calc">
-        <strong>聚类算法</strong>
-        <h3>Cluster Analysis</h3>
-        <p><span class="module-list">M09 - M11</span><br>核心考察：K-Means (优缺点与限制)、层次聚类 (Single/Complete linkage对比) 以及 DBSCAN (核心点/密度可达判别)。</p>
-      </div>
-      <div class="weight-card combined">
-        <strong>数据与模式</strong>
-        <h3>Data Cube & Frequent Pattern</h3>
-        <p><span class="module-list">M08, M12, M13</span><br>核心考察：Apriori 先验性质与剪枝，OLAP (Roll-up/Drill-down)，BUC 自底向上算法与冰山立方体计算。</p>
-      </div>
-    </div>
-  </section>
+<h2>3. BUC 算法机制与剪枝奥义 (Bottom-Up Construction)</h2>
+<p>尽管名为 Bottom-Up，BUC 算法在构建 Data Cube 时实际采用 <strong>自顶向下 (从覆盖全集的 0-D Apex 节点开始，逐步向下深钻进行维度细化切割)</strong> 的执行流向。</p>
+<p><strong>BUC 算法执行流程:</strong></p>
+<p><strong>输入：</strong>基础事实表数据；维度属性列表；冰山阈值 <code>Min_Support</code>。<br>
+<strong>输出：</strong>满足冰山阈值限制的数据立方体 (Iceberg Cube)。</p>
+<ol>
+    <li><strong>[自顶向下启动]</strong>：从 0-D 的 Apex 节点（代表所有数据的全量汇总）开始，准备沿各个维度进行切分。</li>
+    <li><strong>[当前节点聚合]</strong>：计算当前节点在给定维度条件下的聚集指标（如 <code>Count</code> 或 <code>Sum</code>）。</li>
+    <li><strong>[冰山阈值检测]</strong>：判断当前节点的聚集指标是否低于设定的冰山阈值 (Iceberg Threshold)。</li>
+    <li><strong>[触发单调性剪枝]</strong>：如果低于阈值，根据聚合频次的单调递减性，直接触发 <strong>剪枝 (Prune)</strong>，立刻停止对该分支后续所有下层维度的细化切割与探索。</li>
+    <li><strong>[递归数据细分]</strong>：如果满足阈值要求，则保存该节点的聚合结果，并沿着剩余可用维度对数据进行划分 (Partition)，对生成的每个子部分递归执行上述聚合与检测流程。</li>
+    <li><strong>[完成计算]</strong>：当所有维度的递归分支都处理或被剪枝完毕后，算法停止并输出高度压缩的 Iceberg Cube 结果。</li>
+</ol>
 
-  <section class="study-paths">
-    <h2>学习路径指南</h2>
-    <div class="paths-grid">
-      <div class="path-card">
-        <h3>路径 A：预测与分类模型</h3>
-        <p class="path-desc">梳理各种分类算法的原理、步骤，以及它们在过拟合和评估矩阵上的比较。</p>
-        <div class="path-chain">
-          <span class="path-step">M03 决策树</span><span class="path-arrow">→</span>
-          <span class="path-step">M04 KNN</span><span class="path-arrow">→</span>
-          <span class="path-step">M05 规则</span><span class="path-arrow">→</span>
-          <span class="path-step">M06 集成</span><span class="path-arrow">→</span>
-          <span class="path-step">M07 评估</span>
-        </div>
-      </div>
-      <div class="path-card">
-        <h3>路径 B：无监督聚类体系</h3>
-        <p class="path-desc">理解聚类的目标，横向对比三种经典算法如何处理不同形状与噪声数据。</p>
-        <div class="path-chain">
-          <span class="path-step">M09 划分/层次</span><span class="path-arrow">→</span>
-          <span class="path-step">M10 DBSCAN</span><span class="path-arrow">→</span>
-          <span class="path-step">M11 聚类评估</span>
-        </div>
-      </div>
-      <div class="path-card">
-        <h3>路径 C：数据结构与频繁项</h3>
-        <p class="path-desc">从事务数据的关联规则提取，到多维数据仓库的 OLAP 和底层 Cube 计算。</p>
-        <div class="path-chain">
-          <span class="path-step">M08 Apriori</span><span class="path-arrow">→</span>
-          <span class="path-step">M12 OLAP</span><span class="path-arrow">→</span>
-          <span class="path-step">M13 BUC算法</span>
-        </div>
-      </div>
-    </div>
-  </section>
+<h2>4. CCIC (Closed Cube) 的存储优化压缩</h2>
+<p>对于紧密绑定的属性关联组合，向下细分的新维度可能并不会实质性削减数据量（例如特定设备的特定玩家群体，其汇总 <code>Count</code> 与上层指标完全相同）。<br>
+<strong>Closed Cube</strong> 技术识别这种具备 <strong>Ancestor-descendant (祖先后代属性冗余)</strong> 关联的等值聚合，只存储最具代表性的宏观边界指标 <strong>闭合单元 (Closed cell)</strong>，跳过重复存储值，进一步达到极致的内存压缩效果。这常使用 <strong>Hass diagram (哈斯图)</strong> 展示其等价类包含关系。</p>
+<h3>🎯 经典例题</h3>
+<p><strong>【Q1. 函数性质判定题】</strong>如果在数据仓库设计中，需要实现跨层级宏观汇总。现面临三个指标：总样本数 (Count)，平均交易价 (Average) 和最长耗时 (Max)。请判定它们的聚合性质，并说明是否可借由子节点的局部指标合并得出全局结果。</p>
+<p><strong>【解答】</strong>:<br>
+- <strong>Max (最大值) -> Distributive (分配型)</strong>：可直接提取子节点最大值再次对比得出全局最大值。<br>
+- <strong>Count (总点数) -> Distributive (分配型)</strong>：子节点数值直接累加即得整体数值。<br>
+- <strong>Average (均值) -> Algebraic (代数型)</strong>：不能简单累加，需依赖子节点保存的 <code>Sum</code> 与 <code>Count</code> 值进行重算方可得出总体均值。</p>
+<p><strong>【Q2. BUC 命名辨析】</strong>BUC 算法自称为 Bottom-Up (自底向上)，但实际构建过程是从涵盖全集的 Apex 节点向底层拆分解构的，为何采用该命名？</p>
+<p><strong>【解答】</strong>: 算法名称源于其构建 Cuboid 维格体系的视角。它从维度数量最少（0维的 Apex 星核）开始计算，逐步增加维度条件向外扩展，不断构建出涉及维度更高、视图网格体积更庞大的底层 Base Cuboid。由于其构筑维度框架是从微小体量逐层向上叠加生长的，故命名为自底向上构建。</p>
 
-  <section class="modules-wrap" id="modules">
-    <div class="modules-head">
-      <h2>15大核心模块</h2>
-      <p>点击卡片进入对应模块的阅读页。</p>
-    </div>
-
-    <!-- Category 1 -->
-    <div class="section-title">I. 基础概念与模型评估</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m01.html\'">
-        <div class="mc-num">MODULE 01</div><span class="mc-badge normal">基础</span>
-        <h3>概述与数据预处理</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m02.html\'">
-        <div class="mc-num">MODULE 02</div><span class="mc-badge star">⭐必考计算</span>
-        <h3>分类模型性能评估</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m07.html\'">
-        <div class="mc-num">MODULE 07</div><span class="mc-badge scope">理论基础</span>
-        <h3>过拟合与模型评估</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 2 -->
-    <div class="section-title">II. 分类与预测算法</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m03.html\'">
-        <div class="mc-num">MODULE 03</div><span class="mc-badge scope">核心算法</span>
-        <h3>决策树</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m04.html\'">
-        <div class="mc-num">MODULE 04</div><span class="mc-badge scope">核心算法</span>
-        <h3>K-近邻学习 (KNN)</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m05.html\'">
-        <div class="mc-num">MODULE 05</div><span class="mc-badge scope">核心算法</span>
-        <h3>基于规则分类</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m06.html\'">
-        <div class="mc-num">MODULE 06</div><span class="mc-badge star">⭐高频考点</span>
-        <h3>集成学习方法</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 3 -->
-    <div class="section-title">III. 无监督聚类分析</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m09.html\'">
-        <div class="mc-num">MODULE 09</div><span class="mc-badge scope">核心算法</span>
-        <h3>划分与层次聚类</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m10.html\'">
-        <div class="mc-num">MODULE 10</div><span class="mc-badge scope">核心算法</span>
-        <h3>基于密度的聚类</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m11.html\'">
-        <div class="mc-num">MODULE 11</div><span class="mc-badge normal">评估指标</span>
-        <h3>聚类分析评估</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 4 -->
-    <div class="section-title">IV. 频繁模式与数据仓库</div>
-    <div class="modules-grid" style="margin-bottom: 24px;">
-      <div class="module-card" onclick="window.location.href=\'m08.html\'">
-        <div class="mc-num">MODULE 08</div><span class="mc-badge star">⭐必考逻辑</span>
-        <h3>频繁模式：Apriori</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m12.html\'">
-        <div class="mc-num">MODULE 12</div><span class="mc-badge scope">体系结构</span>
-        <h3>数据仓库与 OLAP</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m13.html\'">
-        <div class="mc-num">MODULE 13</div><span class="mc-badge star">⭐重点算法</span>
-        <h3>数据立方体计算</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-
-    <!-- Category 5 -->
-    <div class="section-title" style="color: var(--orange);">V. 专题复习</div>
-    <div class="modules-grid">
-      <div class="module-card" onclick="window.location.href=\'m14.html\'">
-        <div class="mc-num">MODULE 14</div><span class="mc-badge star">⭐核心专题</span>
-        <h3>计算题专题</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-      <div class="module-card" onclick="window.location.href=\'m15.html\'">
-        <div class="mc-num">MODULE 15</div><span class="mc-badge star">⭐核心专题</span>
-        <h3>算法伪代码专题</h3><p class="mc-enter">进入模块 →</p>
-      </div>
-    </div>
-  </section>
-
-  <footer class="footer">
-    <strong>CS5483 Data Warehousing & Data Mining</strong> · Semester B 2025/26<br>
-    本地化完全静态页面 · 期末考试复习指南
-  </footer>
+  </div>
 </div>
 
-
-  <div id="detail-content" class="detail-content"></div>
-</div>
-
-
+<footer class="footer" style="text-align: center; padding: 40px 24px; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; background: #fff;">
+  <strong>CS5483 Data Warehousing & Data Mining</strong> · Semester B 2025/26<br>
+  本地化完全静态页面 · 期末考试复习指南
+</footer>
 
 </body>
 </html>
